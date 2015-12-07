@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="win32">
+      <UniqueIdentifier>{84a8ebd7-7cf0-47f6-b75e-d441df67da40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{715254bc-d70b-4ec5-bf29-467dd3ace079}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{bb6c862e-70e9-49d9-81b7-3829a6f50471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\include">
+      <UniqueIdentifier>{6f93cf39-bfd9-4551-bbbd-47d02f017b9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\src">
+      <UniqueIdentifier>{f643630a-c3cc-4bfd-be20-8a1fefd21122}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\AppDelegate.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\GameData.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\GameScene.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\LevelLoader.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\MainMenuScene.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\PauseScene.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\LevelTile.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\Level.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\LevelObject.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\Unit.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\AppDelegate.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\GameData.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\GameScene.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\LevelLoader.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\MainMenuScene.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\PauseScene.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\Level.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\Leveltile.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\LevelObject.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\Unit.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="game.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
