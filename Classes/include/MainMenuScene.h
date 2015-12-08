@@ -10,6 +10,7 @@ public:
 	virtual bool init();
 
 	void activateGameScene(Ref * pSender);
+	void quitGame(Ref* sender);
 
 	CREATE_FUNC(MainMenu);
 };
