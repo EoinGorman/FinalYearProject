@@ -20,12 +20,24 @@ bool Pause::init()
 		return false;
 	}
 
-	auto label = Label::createWithSystemFont("Pause Scene", "Arial", 96);
-	label->setAnchorPoint(cocos2d::Vec2(0.5, 0.5));
-	Vec2 pos = label->getPosition();
-	label->setPosition(100, 1);
-	this->addChild(label, 1);
+	auto playItem =
+		MenuItemImage::create("MainMenuScene/playButtonDefault.png",
+		"MainMenuScene/playButtonClicked.png",
+		CC_CALLBACK_1(Pause::resume, this));
 
+
+	auto quitItem =
+		MenuItemImage::create("MainMenuScene/quitButtonDefault.png",
+		"MainMenuScene/quitButtonClicked.png",
+		CC_CALLBACK_1(Pause::activateMainMenuScene, this));
+
+	auto menu = Menu::create(playItem, quitItem, NULL);
+
+	// Returns visible size of OpenGL window in points.
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	menu->alignItemsVerticallyWithPadding(visibleSize.height / 3);
+
+	this->addChild(menu);
 	return true;
 }
 
@@ -36,6 +48,7 @@ void Pause::resume(Ref *pSender)
 
 void Pause::activateMainMenuScene(Ref *pSender)
 {
+
 	auto scene = MainMenu::createScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->replaceScene(scene);

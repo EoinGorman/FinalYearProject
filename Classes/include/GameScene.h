@@ -30,6 +30,9 @@ public:
 	virtual void onTouchMoved(cocos2d::Touch*, cocos2d::Event*);
 	virtual void onTouchCancelled(cocos2d::Touch*, cocos2d::Event*);
 
+	virtual void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event);
+	virtual void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event);
+
 	void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType);
 	void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit);
 	void Game::SpawnUnit(LevelTile* tile);

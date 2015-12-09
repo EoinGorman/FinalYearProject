@@ -21,14 +21,18 @@ bool Game::init()
 		return false;
 	}
 
+	//Set up Key Listeners
+	auto listener = EventListenerKeyboard::create();
+	listener->onKeyPressed = CC_CALLBACK_2(Game::onKeyPressed, this);
+	listener->onKeyReleased = CC_CALLBACK_2(Game::onKeyReleased, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
 	//Set up Click Listeners
 	auto touchListener = EventListenerTouchOneByOne::create();
-
 	touchListener->onTouchBegan = CC_CALLBACK_2(Game::onTouchBegan, this);
 	touchListener->onTouchEnded = CC_CALLBACK_2(Game::onTouchEnded, this);
 	touchListener->onTouchMoved = CC_CALLBACK_2(Game::onTouchMoved, this);
 	touchListener->onTouchCancelled = CC_CALLBACK_2(Game::onTouchCancelled, this);
-
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 
 	auto label = Label::createWithSystemFont(".", "Arial", 96);
@@ -73,6 +77,23 @@ void Game::update(float delta)
 
 }
 
+//KEY LISTENERS
+void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
+{
+	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_ESCAPE)
+	{
+		auto scene = Pause::createScene();
+		Director::getInstance()->pushScene(scene);
+	}
+}
+
+void Game::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
+{
+
+}
+
+
+//TOUCH LISTENERS
 bool Game::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	return true;
@@ -191,6 +212,8 @@ void Game::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 
 }
+
+
 
 void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType)
 {

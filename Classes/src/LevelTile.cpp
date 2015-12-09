@@ -27,9 +27,7 @@ LevelTile::LevelTile(Type type, cocos2d::Vec2 position)
 
 LevelTile::~LevelTile()
 {
-	int x = 1;
-	x++;
-	//bluehghega
+	delete m_unit;
 }
 
 void LevelTile::AddSpriteToScene(cocos2d::Layer* layer)

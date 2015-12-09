@@ -47,14 +47,14 @@ bool MainMenu::init()
 
 	this->addChild(backgroundSprite);
 	this->addChild(menu);
-
+	 
 	return true;
 }
 
 void MainMenu::activateGameScene(Ref *pSender)
 {
-	auto scene = Game::createScene();
-	Director::getInstance()->replaceScene(TransitionFade::create(1.0, scene));
+	auto scene = Game::createScene(); 
+	Director::getInstance()->replaceScene(TransitionFlipAngular::create(1.0, scene));
 }
 
 void MainMenu::quitGame(Ref* pSender)
