@@ -21,6 +21,10 @@ bool Game::init()
 		return false;
 	}
 
+	//DO AUDIO YOU LAZY CUNT!! 
+	//USE CCFOLLOW WITH MOUSE INPUT OR SOMETHING... :/
+	//CCFollow
+
 	//Set up Key Listeners
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = CC_CALLBACK_2(Game::onKeyPressed, this);
@@ -112,6 +116,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 			rect.setRect(tile->GetPosition().x - rect.size.width / 2, tile->GetPosition().y - rect.size.height / 2, rect.size.width, rect.size.height);
 			if (rect.containsPoint(touch->getLocation()))
 			{
+				this->setPosition(tile->GetPosition());
 				std::cout << "Tile Clicked: " << tile->GetType();
 
 				//If player has clicked a tile with unit on it
@@ -206,6 +211,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 }
 void Game::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event)
 {
+
 
 }
 void Game::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event)
