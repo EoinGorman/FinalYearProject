@@ -44,14 +44,15 @@ bool Pause::init()
 void Pause::resume(Ref *pSender)
 {
 	Director::getInstance()->popScene();
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
 
 void Pause::activateMainMenuScene(Ref *pSender)
 {
-
 	auto scene = MainMenu::createScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->replaceScene(scene);
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
 
 void Pause::retry(Ref *pSender)
@@ -59,4 +60,5 @@ void Pause::retry(Ref *pSender)
 	auto scene = Game::createScene();
 	Director::getInstance()->popScene();
 	Director::getInstance()->replaceScene(scene);
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }

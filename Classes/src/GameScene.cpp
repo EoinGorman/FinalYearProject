@@ -21,7 +21,9 @@ bool Game::init()
 		return false;
 	}
 
-	//DO AUDIO YOU LAZY CUNT!! 
+	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("GameScene/MenuTheme1.wav", true);
+
 	//USE CCFOLLOW WITH MOUSE INPUT OR SOMETHING... :/
 	//CCFollow
 
@@ -39,11 +41,13 @@ bool Game::init()
 	touchListener->onTouchCancelled = CC_CALLBACK_2(Game::onTouchCancelled, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 
+	/*
 	auto label = Label::createWithSystemFont(".", "Arial", 96);
 	label->setAnchorPoint(cocos2d::Vec2(0, 0));
 	Vec2 pos = label->getPosition();
 	label->setPosition(0, 0);
 	this->addChild(label, 1);
+	*/
 
 	Level::GetInstance()->Load("level1", this);
 	this->scheduleUpdate();
@@ -88,6 +92,7 @@ void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event 
 	{
 		auto scene = Pause::createScene();
 		Director::getInstance()->pushScene(scene);
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -116,7 +121,6 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 			rect.setRect(tile->GetPosition().x - rect.size.width / 2, tile->GetPosition().y - rect.size.height / 2, rect.size.width, rect.size.height);
 			if (rect.containsPoint(touch->getLocation()))
 			{
-				this->setPosition(tile->GetPosition());
 				std::cout << "Tile Clicked: " << tile->GetType();
 
 				//If player has clicked a tile with unit on it
@@ -135,6 +139,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					//
 					SetSelectableTilesForSpawning(tile, unitType);
 					m_currentStage = ChoosingSpawn;
+					CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/selectBuildingSound.wav", false, 1.0f, 1.0f, 1.0f);
 				}
 			}
 		}
@@ -266,4 +271,5 @@ void Game::SpawnUnit(LevelTile* tile)
 	tile->SetOccupyingUnit(new Unit(Unit::Type::smallTank, Level::GetInstance()->GetTileIndexPosition(tile)), this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
