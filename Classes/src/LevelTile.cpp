@@ -3,7 +3,9 @@
 LevelTile::LevelTile()
 {
 	m_hasObject = false;
-	m_hasUnit = false; 
+	m_object = NULL;
+	m_hasUnit = false;
+	m_unit = NULL;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 
 	m_type = Type::Grass;
@@ -15,11 +17,14 @@ LevelTile::LevelTile()
 LevelTile::LevelTile(Type type, cocos2d::Vec2 position)
 {
 	m_hasObject = false;
+	m_object = NULL;
 	m_hasUnit = false;
+	m_unit = NULL;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	m_type = type;
 	m_position = position;
-	m_sprite = cocos2d::Sprite::create("tiles.png", cocos2d::Rect(m_type * ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
+	int xOffset = m_type * ptr->m_tileSize;
+	m_sprite = cocos2d::Sprite::create("tiles.png", cocos2d::Rect(xOffset, 0, ptr->m_tileSize, ptr->m_tileSize));
 	//m_sprite->setContentSize(cocos2d::Size(ptr->m_tileSize, ptr->m_tileSize));	//Not sure what this function does yet, not really needed anyway.. GOOGLE IT LATER ME!!!
 	m_sprite->setPosition(m_position);
 }
@@ -27,6 +32,7 @@ LevelTile::LevelTile(Type type, cocos2d::Vec2 position)
 
 LevelTile::~LevelTile()
 {
+	if (m_unit != NULL)
 	delete m_unit;
 }
 

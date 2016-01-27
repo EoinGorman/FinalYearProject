@@ -2,12 +2,19 @@
 
 #include "cocos2d.h"
 #include "PauseScene.h"
+#include "HudLayer.h"
 #include "Level.h"
 
 class Game : public cocos2d::Layer
 {
 public:
+	cocos2d::Vec2 cameraDirection;
+	//HudLayer* hud;
+
 	//Game logic variables
+	int ScreenWidth;
+	int ScreenHeight;
+
 	int m_currentPlayer;
 	enum TurnStage
 	{
@@ -18,7 +25,6 @@ public:
 	};
 	TurnStage m_currentStage;
 	std::list<LevelTile*> m_selectableTiles;
-
 	static cocos2d::Scene* createScene();
 	virtual bool init();
 
@@ -33,9 +39,12 @@ public:
 	virtual void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event);
 	virtual void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event);
 
-	void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType);
-	void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit);
-	void Game::SpawnUnit(LevelTile* tile);
+	virtual void onMouseMove(cocos2d::Event *event);
 
+	void SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType);
+	void SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit);
+	void SpawnUnit(LevelTile* tile);
+	void EndTurn();
+	
 	CREATE_FUNC(Game);
 };

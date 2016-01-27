@@ -39,7 +39,7 @@ void Level::Load(std::string levelName, cocos2d::Layer* layer)
 	backgroundSprite->setScaleY(visibleSize.width / backgroundSprite->getContentSize().width);
 	//layer->addChild(backgroundSprite, -1);
 
-	//Create and place tiles
+	//Create and place tiles 
 	std::vector<int> terrainTypes = ptr->m_levelTerrain;
 	int count = 0; 
 	for (int i = 0; i < ptr->m_height; i++)
@@ -53,6 +53,7 @@ void Level::Load(std::string levelName, cocos2d::Layer* layer)
 	}
 
 	//Create and place objects (buildings for now I think?)
+	int hqCount = 0;
 	std::vector<int> objectTypes = ptr->m_levelObjects;
 	count = 0;
 	for (int i = 0; i < ptr->m_height; i++)
@@ -61,7 +62,17 @@ void Level::Load(std::string levelName, cocos2d::Layer* layer)
 		{
 			if (objectTypes[count] != 0)
 			{
-				m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i)));
+				auto type = objectTypes[count];
+				if (type == LevelObject::Type::HQ)
+				{
+					hqCount++;
+					m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i), hqCount));
+				}
+				else
+				{
+					m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i), 0));
+				}
+
 				m_levelObjects[m_levelObjects.size()-1]->AddSpriteToScene(layer);
 				m_levelTerrain[count]->SetOccupyingObject(m_levelObjects[m_levelObjects.size() - 1]);	//Give terrain tile a reference to the object on top of it
 			}

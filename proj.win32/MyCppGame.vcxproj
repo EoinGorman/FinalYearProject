@@ -143,6 +143,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y</Command>
     <ClCompile Include="..\Classes\src\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\src\GameData.cpp" />
     <ClCompile Include="..\Classes\src\GameScene.cpp" />
+    <ClCompile Include="..\Classes\src\HudLayer.cpp" />
     <ClCompile Include="..\Classes\src\Level.cpp" />
     <ClCompile Include="..\Classes\src\LevelLoader.cpp" />
     <ClCompile Include="..\Classes\src\LevelObject.cpp" />
@@ -156,6 +157,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y</Command>
     <ClInclude Include="..\Classes\include\AppDelegate.h" />
     <ClInclude Include="..\Classes\include\GameData.h" />
     <ClInclude Include="..\Classes\include\GameScene.h" />
+    <ClInclude Include="..\Classes\include\HudLayer.h" />
     <ClInclude Include="..\Classes\include\Level.h" />
     <ClInclude Include="..\Classes\include\LevelLoader.h" />
     <ClInclude Include="..\Classes\include\LevelObject.h" />

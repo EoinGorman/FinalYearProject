@@ -30,12 +30,14 @@ public:
 
 	//Constructors
 	Unit();
-	Unit(Unit::Type type, cocos2d::Vec2 tile);
+	Unit(Unit::Type type, cocos2d::Vec2 tile, int player);
 
 	void AddSpriteToScene(cocos2d::Layer* layer);
 	Type GetType();
 	cocos2d::Vec2 GetPosition();
 	void SetUnitStats();
+
+	int GetOwner();
 
 	float m_health;	//All units have 10 health - displayed as an int in game
 	float m_baseDefence;	//Defence of unit type
@@ -47,6 +49,7 @@ public:
 	bool moved;
 
 private:
+	int m_owner;
 	MovementType m_movementType;
 	Type m_type;
 

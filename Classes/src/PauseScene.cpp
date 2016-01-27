@@ -51,6 +51,7 @@ void Pause::activateMainMenuScene(Ref *pSender)
 {
 	auto scene = MainMenu::createScene();
 	Director::getInstance()->popScene();
+	delete Level::GetInstance();
 	Director::getInstance()->replaceScene(scene);
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }

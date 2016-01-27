@@ -14,8 +14,6 @@ public:
 	~Level()
 	{
 		instanceFlag = false;
-
-		delete instance;
 		for each (LevelTile* tile in m_levelTerrain)
 		{
 			delete tile;

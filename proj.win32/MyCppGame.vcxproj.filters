@@ -51,6 +51,9 @@
     <ClCompile Include="..\Classes\src\Unit.cpp">
       <Filter>src\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\src\HudLayer.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -84,6 +87,9 @@
       <Filter>src\include</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\include\Unit.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\HudLayer.h">
       <Filter>src\include</Filter>
     </ClInclude>
   </ItemGroup>

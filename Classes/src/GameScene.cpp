@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include <iostream>
 
+#define CameraSpeed 350
 USING_NS_CC;
 
 Scene* Game::createScene()
@@ -8,8 +9,11 @@ Scene* Game::createScene()
 	// 'scene' is an autorelease object
 	auto scene = Scene::create();
 	auto layer = Game::create();
-
+	auto hud = HudLayer::create();
+	layer->setName("GameLayer");
+	hud->setName("HudLayer");
 	scene->addChild(layer);
+	scene->addChild(hud);
 
 	return scene;
 }
@@ -21,11 +25,29 @@ bool Game::init()
 		return false;
 	}
 
-	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
-	CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("GameScene/MenuTheme1.wav", true);
+	ScreenWidth = Director::getInstance()->getWinSizeInPixels().width;
+	ScreenHeight = Director::getInstance()->getWinSizeInPixels().height;
+	// TEMP MUTE!!!	----------------------------------------------------------------------------------------------
+	CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0);
+	// \TEMP MUTE!! ----------------------------------------------------------------------------------------------
+
+
+	//CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	//CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("GameScene/MenuTheme1.wav", true);
 
 	//USE CCFOLLOW WITH MOUSE INPUT OR SOMETHING... :/
 	//CCFollow
+
+	//Create UI
+	// creating a menu with a single item
+
+	// create a menu item
+	//auto closeItem = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
+	//	CC_CALLBACK_1(Game::onEndTurn, this));
+
+
+	//auto menu = Menu::create(closeItem, NULL);
+	//this->addChild(menu, 1);
 
 	//Set up Key Listeners
 	auto listener = EventListenerKeyboard::create();
@@ -41,6 +63,11 @@ bool Game::init()
 	touchListener->onTouchCancelled = CC_CALLBACK_2(Game::onTouchCancelled, this);
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 
+	//Set up Mouse Listeners
+	auto _mouseListener = EventListenerMouse::create();
+	_mouseListener->onMouseMove = CC_CALLBACK_1(Game::onMouseMove, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(_mouseListener, this);
+
 	/*
 	auto label = Label::createWithSystemFont(".", "Arial", 96);
 	label->setAnchorPoint(cocos2d::Vec2(0, 0));
@@ -48,11 +75,19 @@ bool Game::init()
 	label->setPosition(0, 0);
 	this->addChild(label, 1);
 	*/
+	
+	cameraDirection = Vec2(0, 0);
+	this->setPosition(ScreenWidth/2, ScreenHeight/2);
 
 	Level::GetInstance()->Load("level1", this);
 	this->scheduleUpdate();
 	m_currentPlayer = 1;
 	m_currentStage = TurnStage::Waiting;
+
+
+	//hud = HudLayer::create();
+	//Director::getInstance()->getRunningScene()->addChild(hud);
+
 	return true;
 }
 
@@ -65,6 +100,14 @@ void Game::activatePauseScene(Ref *pSender)
 void Game::update(float delta)
 {
 	//Update Loop
+
+	if (cameraDirection.length() > 0)
+	{
+		Vec2 newPos = this->getPosition();
+		newPos += cameraDirection * delta * CameraSpeed;
+		this->setPosition(newPos);
+	}
+
 	//Player 1s turn
 	if (m_currentPlayer == 1)
 	{
@@ -75,24 +118,22 @@ void Game::update(float delta)
 	{
 
 	}
-
-	//TEMP move camera
-	/*
-	int SPEED = 10;
-	this->setPosition(this->getPosition().x - SPEED * delta, this->getPosition().y - SPEED * delta);
-	this->setScale(0.5f);
-	*/
-
 }
 
 //KEY LISTENERS
 void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
 {
+	//Escape Key will Pause Game
 	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_ESCAPE)
 	{
 		auto scene = Pause::createScene();
 		Director::getInstance()->pushScene(scene);
 		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
+	}
+	//Temp end turn key
+	else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_P && m_currentStage == Waiting)
+	{
+		EndTurn();
 	}
 }
 
@@ -111,6 +152,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	CCRect rect = CCRectMake(0, 0, ptr->m_tileSize, ptr->m_tileSize);
+	bool clickCanceled = true;
 
 	switch (m_currentStage)
 	{
@@ -118,21 +160,25 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 		//See if player clicks a tile
 		for each (LevelTile* tile in Level::GetInstance()->GetTiles())
 		{
-			rect.setRect(tile->GetPosition().x - rect.size.width / 2, tile->GetPosition().y - rect.size.height / 2, rect.size.width, rect.size.height);
+			rect.setRect(
+				(tile->GetPosition().x - rect.size.width / 2) + this->getPositionX(),
+				(tile->GetPosition().y - rect.size.height / 2) + this->getPositionY(),
+				rect.size.width,
+				rect.size.height);
+
 			if (rect.containsPoint(touch->getLocation()))
 			{
 				std::cout << "Tile Clicked: " << tile->GetType();
 
 				//If player has clicked a tile with unit on it
-				if (tile->HasUnit())
+				if (tile->HasUnit() && tile->GetOccupyingUnit()->GetOwner() == m_currentPlayer)
 				{
-
 					SetSelectableTilesForMoving(tile, tile->GetOccupyingUnit());
 					m_currentStage = ChoosingMove;
 				}
 
 				//If player has clicked a tile with building on it
-				else if (tile->HasObject())
+				else if (tile->HasObject() && tile->GetOccupyingObject()->GetOwner() == m_currentPlayer)
 				{
 					//Select unit to build ---
 					Unit::Type unitType = Unit::Type::smallTank;
@@ -149,11 +195,16 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 		//Wait for player to click an appropriate tile
 		for each (LevelTile* tile in m_selectableTiles)
 		{
-			rect.setRect(tile->GetPosition().x - rect.size.width / 2, tile->GetPosition().y - rect.size.height / 2, rect.size.width, rect.size.height);
+			rect.setRect(
+				(tile->GetPosition().x - rect.size.width / 2) + this->getPositionX(),
+				(tile->GetPosition().y - rect.size.height / 2) + this->getPositionY(),
+				rect.size.width,
+				rect.size.height);
 			if (rect.containsPoint(touch->getLocation()))
 			{
 				std::cout << "Selectable Tile Clicked: " << tile->GetType();
 
+				clickCanceled = false;
 				//If player has clicked a tile with no other unit on it
 				if (!tile->HasUnit())
 				{
@@ -161,20 +212,19 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					break;
 				}
 			}
+		}
 
-			else
+		if (clickCanceled)
+		{
+			//Cancel spawn
+			for each (LevelTile* tile in m_selectableTiles)
 			{
-				/*
-				//Cancel spawn
-				for each (LevelTile* tile in m_selectableTiles)
-				{
-					tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
-				}
-				m_selectableTiles.clear();
-				m_currentStage = Waiting;
-				break;
-				*/
+				tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
 			}
+			m_selectableTiles.clear();
+			m_currentStage = Waiting;
+			break;
+
 		}
 
 		break;
@@ -182,7 +232,11 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 		//Wait for player to click an appropriate tile
 		for each (LevelTile* tile in m_selectableTiles)
 		{
-			rect.setRect(tile->GetPosition().x - rect.size.width / 2, tile->GetPosition().y - rect.size.height / 2, rect.size.width, rect.size.height);
+			rect.setRect(
+				(tile->GetPosition().x - rect.size.width / 2) + this->getPositionX(),
+				(tile->GetPosition().y - rect.size.height / 2) + this->getPositionY(),
+				rect.size.width,
+				rect.size.height);
 			if (rect.containsPoint(touch->getLocation()))
 			{
 				std::cout << "Selectable Tile Clicked: " << tile->GetType();
@@ -190,24 +244,23 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 				//If player has clicked a tile with no other unit on it
 				if (!tile->HasUnit())
 				{
+					clickCanceled = false;
 					//Move selected unit to here
 					break;
 				}
 			}
+		}
 
-			else
+		if (clickCanceled)
+		{
+			//Cancel spawn
+			for each (LevelTile* tile in m_selectableTiles)
 			{
-				/*
-				//Cancel spawn
-				for each (LevelTile* tile in m_selectableTiles)
-				{
 				tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
-				}
-				m_selectableTiles.clear();
-				m_currentStage = Waiting;
-				break;
-				*/
 			}
+			m_selectableTiles.clear();
+			m_currentStage = Waiting;
+			break;
 		}
 		break;
 	case ChoosingAttack:
@@ -217,13 +270,68 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 void Game::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 
-
 }
 void Game::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 
 }
 
+void Game::onMouseMove(Event *event)
+{
+	EventMouse* e = (EventMouse*)event;
+	Vec2 touchLocation = e->getLocationInView();//event->getLocation();
+	Vec2 center = Vec2(ScreenWidth/2, -ScreenHeight/2);
+
+	center.subtract(touchLocation);
+
+	if (ScreenHeight >= ScreenWidth)
+	{
+		if (center.length() > (ScreenWidth / 10 * 9) / 2)
+		{
+			cameraDirection = center.getNormalized();
+			return;
+		}
+	}
+
+	else
+	{
+		if (center.length() > (ScreenHeight / 10 * 9) / 2)
+		{
+			cameraDirection = center.getNormalized();
+			return;
+		}
+	}
+
+	cameraDirection = Vec2(0, 0);
+
+	/*
+	if (touchLocation.x < ScreenWidth / 10)
+	{
+		cameraDirection.x = 1;
+	}
+	else if (touchLocation.x > (ScreenWidth / 10) * 9)
+	{
+		cameraDirection.x = -1;
+	}
+	else
+	{
+		cameraDirection.x = 0;
+	}
+
+	if (touchLocation.y > -(ScreenHeight / 10))
+	{
+		cameraDirection.y = -1;
+	}
+	else if (touchLocation.y < -(ScreenHeight / 10 * 9))
+	{
+		cameraDirection.y = 1;
+	}
+	else
+	{
+		cameraDirection.y = 0;
+	}
+	*/
+}
 
 
 void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType)
@@ -268,8 +376,22 @@ void Game::SpawnUnit(LevelTile* tile)
 	{
 		tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
 	}
-	tile->SetOccupyingUnit(new Unit(Unit::Type::smallTank, Level::GetInstance()->GetTileIndexPosition(tile)), this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
+	tile->SetOccupyingUnit(new Unit(Unit::Type::smallTank, Level::GetInstance()->GetTileIndexPosition(tile), m_currentPlayer), this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
+}
+
+void Game::EndTurn()
+{
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
+	if (m_currentPlayer == 1)
+	{
+		m_currentPlayer = 2;
+	}
+
+	else if (m_currentPlayer == 2)
+	{
+		m_currentPlayer = 1;
+	}
 }

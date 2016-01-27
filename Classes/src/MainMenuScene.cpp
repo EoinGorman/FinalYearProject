@@ -19,8 +19,8 @@ bool MainMenu::init()
 	{
 		return false;
 	}
-	CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
-	CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("MainMenuScene/MenuTheme0.wav", true);
+	//CocosDenshion::SimpleAudioEngine::getInstance()->stopBackgroundMusic();
+	//CocosDenshion::SimpleAudioEngine::getInstance()->playBackgroundMusic("MainMenuScene/MenuTheme0.wav", true);
 
 	auto playItem =
 		MenuItemImage::create("MainMenuScene/playButtonDefault.png",
