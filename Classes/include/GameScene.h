@@ -23,6 +23,7 @@ public:
 		ChoosingMove,
 		ChoosingAttack
 	};
+	bool m_paused;
 	TurnStage m_currentStage;
 	std::list<LevelTile*> m_selectableTiles;
 	static cocos2d::Scene* createScene();
@@ -45,6 +46,13 @@ public:
 	void SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit);
 	void SpawnUnit(LevelTile* tile);
 	void EndTurn();
+	void TogglePauseMenu();
+	void ToggleBuildMenu();
+	void SetUnitTypeSelected(Unit::Type);
 	
 	CREATE_FUNC(Game);
+
+private:
+	Unit::Type m_unitTypeSelected;
+	LevelTile* m_levelTileSelected;
 };
