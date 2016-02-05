@@ -30,8 +30,7 @@ private:
 	void HudLayer::CreateBuildMenu();
 	void HudLayer::CreateHud();
 	void HudLayer::BuildUnit(Unit::Type);
-	cocos2d::Sprite* m_redLogo;
-	cocos2d::Sprite* m_blueLogo;
+	std::vector<cocos2d::Sprite*> m_factionLogos;
 	cocos2d::Sprite* m_ticketFrame;
 
 	cocos2d::Sprite* m_pauseBackground;

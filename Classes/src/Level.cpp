@@ -1,4 +1,5 @@
 #include "Level.h"
+#include "PlayerManager.h"
 
 bool Level::instanceFlag = false;
 Level* Level::instance = NULL;
@@ -20,14 +21,21 @@ Level* Level::GetInstance()
 Level::Level()
 {
 	//Empty constructor
+	m_levelToLoadName = "Level1";
 }
 
-void Level::Load(std::string levelName, cocos2d::Layer* layer)
+void Level::Load(cocos2d::Layer* layer)
 {
+	//1.	SELECT LEVEL AND THEN...	FYI: Use SetLevelToLoad() function
 	//Load the data for the current level
 	LevelLoader loader;
-	loader.LoadLevel(levelName); 
+	loader.LoadLevel(m_levelToLoadName); 
 
+	//2.	SELECT CHARACTERS AND THEN...
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::red);
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::green);
+
+	//3.	LOAD ACTUAL LEVEL
 	cocos2d::Size visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 
@@ -65,12 +73,12 @@ void Level::Load(std::string levelName, cocos2d::Layer* layer)
 				auto type = objectTypes[count];
 				if (type == LevelObject::Type::HQ)
 				{
+					m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i), PlayerManager::GetInstance()->GetPlayerByID(hqCount)));
 					hqCount++;
-					m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i), hqCount));
 				}
 				else
 				{
-					m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i), 0));
+					m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i), NULL));
 				}
 
 				m_levelObjects[m_levelObjects.size()-1]->AddSpriteToScene(layer);
@@ -79,10 +87,6 @@ void Level::Load(std::string levelName, cocos2d::Layer* layer)
 			count++;
 		}
 	}
-
-	//CAMERA SHIT
-	//Move layer backward so 'x' tile is focal point
-	//layer->setPosition(layer->getPosition() - m_levelTerrain[8 * 8].GetPosition());
 }
 
 
@@ -197,4 +201,9 @@ bool Level::IsAttackableUnit(Unit::Type unitType, Unit::MovementType otherUnitTy
 	case Unit::Type::attackCopter:
 		return true;
 	}
+}
+
+void Level::SetLevelToLoad(std::string levelName)
+{
+	m_levelToLoadName = levelName;
 }

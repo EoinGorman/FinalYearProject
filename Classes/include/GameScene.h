@@ -15,9 +15,10 @@ public:
 	int ScreenWidth;
 	int ScreenHeight;
 
-	int m_currentPlayer;
+	int m_currentPlayerID;
 	enum TurnStage
 	{
+		ChoosingFactions,
 		Waiting,
 		ChoosingSpawn,
 		ChoosingMove,
@@ -53,6 +54,7 @@ public:
 	CREATE_FUNC(Game);
 
 private:
+	void SetNextPlayer();
 	Unit::Type m_unitTypeSelected;
 	LevelTile* m_levelTileSelected;
 };

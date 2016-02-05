@@ -54,13 +54,22 @@ void LevelLoader::LoadLevel(std::string levelName)
 	//std::reverse(ptr->m_levelTerrain.begin(), ptr->m_levelTerrain.end());.
 
 	//Get the level objects
+	int hqCount = 0;
 	const Value& objectsArray = m_document["Objects"];
 	ptr->m_levelObjects.clear();
 	ptr->m_levelObjects = std::vector<int>(objectsArray.Size());
 	// Iterate through the array.
 	for (int i = 0; i < objectsArray.Size(); i++) {
 		ptr->m_levelObjects[i] = objectsArray[i].GetInt();
+		if (objectsArray[i].GetInt() == 1)
+		{
+			hqCount++;
+		}
 	}
+
+	//Setup number of players
+	PlayerManager::GetInstance()->SetNumberOfPlayers(hqCount);
+
 	//Reverse vector because coordinate systems of level file and cocos are different
 	//std::reverse(ptr->m_levelObjects.begin(), ptr->m_levelObjects.end());
 }

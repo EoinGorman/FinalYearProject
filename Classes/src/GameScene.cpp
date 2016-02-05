@@ -53,9 +53,11 @@ bool Game::init()
 	cameraDirection = Vec2(0, 0);
 	this->setPosition(ScreenWidth/2, ScreenHeight/2);
 
-	Level::GetInstance()->Load("level1", this);
+	Level::GetInstance()->SetLevelToLoad("Level1");
+	Level::GetInstance()->Load(this);
+
 	this->scheduleUpdate();
-	m_currentPlayer = 1;
+	m_currentPlayerID = 0;
 	m_currentStage = TurnStage::Waiting;
 
 	m_paused = false;
@@ -81,12 +83,12 @@ void Game::update(float delta)
 		}
 
 		//Player 1s turn
-		if (m_currentPlayer == 1)
+		if (m_currentPlayerID == 1)
 		{
 
 		}
 		//Player 2s turn
-		else if (m_currentPlayer == 2)
+		else if (m_currentPlayerID == 2)
 		{
 
 		}
@@ -185,25 +187,28 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					std::cout << "Tile Clicked: " << tile->GetType();
 
 					//If player has clicked a tile with unit on it
-					if (tile->HasUnit() && tile->GetOccupyingUnit()->GetOwner() == m_currentPlayer)
+					if (tile->HasUnit() && tile->GetOccupyingUnit()->GetOwner()->GetId() == m_currentPlayerID)
 					{
 						SetSelectableTilesForMoving(tile, tile->GetOccupyingUnit());
 						m_currentStage = ChoosingMove;
 					}
 
 					//If player has clicked a tile with building on it
-					else if (tile->HasObject() && tile->GetOccupyingObject()->GetOwner() == m_currentPlayer)
+					else if (tile->HasObject() && tile->GetOccupyingObject()->GetOwner() != NULL)
 					{
-						//Select unit to build ---
-						m_levelTileSelected = tile;
-						ToggleBuildMenu();
-						/*
-						Unit::Type unitType = Unit::Type::smallTank;
-						//
-						SetSelectableTilesForSpawning(tile, unitType);
-						m_currentStage = ChoosingSpawn;
-						CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/selectBuildingSound.wav", false, 1.0f, 1.0f, 1.0f);
-						*/
+						if (tile->GetOccupyingObject()->GetOwner()->GetId() == m_currentPlayerID)
+						{
+							//Select unit to build ---
+							m_levelTileSelected = tile;
+							ToggleBuildMenu();
+							/*
+							Unit::Type unitType = Unit::Type::smallTank;
+							//
+							SetSelectableTilesForSpawning(tile, unitType);
+							m_currentStage = ChoosingSpawn;
+							CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/selectBuildingSound.wav", false, 1.0f, 1.0f, 1.0f);
+							*/
+						}
 					}
 				}
 			}
@@ -402,7 +407,7 @@ void Game::SpawnUnit(LevelTile* tile)
 	{
 		tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
 	}
-	tile->SetOccupyingUnit(new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), m_currentPlayer), this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
+	tile->SetOccupyingUnit(new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)), this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
@@ -411,15 +416,7 @@ void Game::SpawnUnit(LevelTile* tile)
 void Game::EndTurn()
 {
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
-	if (m_currentPlayer == 1)
-	{
-		m_currentPlayer = 2;
-	}
-
-	else if (m_currentPlayer == 2)
-	{
-		m_currentPlayer = 1;
-	}
+	SetNextPlayer();
 
 	//Cancel
 	for each (LevelTile* tile in m_selectableTiles)
@@ -455,4 +452,16 @@ void Game::SetUnitTypeSelected(Unit::Type type)
 	SetSelectableTilesForSpawning(m_levelTileSelected, m_unitTypeSelected);
 	m_currentStage = ChoosingSpawn;
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/selectBuildingSound.wav", false, 1.0f, 1.0f, 1.0f);
+}
+
+void Game::SetNextPlayer()
+{
+	if (m_currentPlayerID >= PlayerManager::GetInstance()->GetPlayerCount() -1)	//If player count is 2 then the second players ID will be 1 so need to subtract here
+	{
+		m_currentPlayerID = 0;
+	}
+	else
+	{
+		m_currentPlayerID++;
+	}
 }

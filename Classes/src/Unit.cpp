@@ -13,9 +13,9 @@ Unit::Unit()
 	m_owner = 0;
 }
 
-Unit::Unit(Type type, cocos2d::Vec2 tile, int player)
+Unit::Unit(Type type, cocos2d::Vec2 tile, Player* owner)
 {
-	m_owner = player;
+	m_owner = owner;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	moved = true;
 	m_tile = tile;
@@ -23,16 +23,7 @@ Unit::Unit(Type type, cocos2d::Vec2 tile, int player)
 	m_position = cocos2d::Vec2(m_tile.x * ptr->m_tileSize, m_tile.y * ptr->m_tileSize);
 	SetUnitStats();
 	m_sprite->setPosition(m_position);
-
-	if (m_owner == 1)
-	{
-		m_sprite->setColor(cocos2d::Color3B(255, 0, 0));
-	}
-
-	else if (m_owner == 2)
-	{
-		m_sprite->setColor(cocos2d::Color3B(0, 0, 255));
-	}
+	m_sprite->setColor(owner->GetColour());
 }
  
 
@@ -108,7 +99,7 @@ cocos2d::Vec2 Unit::GetPosition()
 	return m_position;
 }
 
-int Unit::GetOwner()
+Player* Unit::GetOwner()
 {
 	return m_owner;
 }

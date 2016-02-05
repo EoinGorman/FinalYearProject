@@ -91,19 +91,24 @@ void HudLayer::CreateHud()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	
 	cocos2d::Point offsetFromCorner(25, -25);
-	m_redLogo = cocos2d::Sprite::create("Hud/redLogo.png");
-	m_blueLogo = cocos2d::Sprite::create("Hud/blueLogo.png");
-	m_ticketFrame = cocos2d::Sprite::create("Hud/ticketHolder.png");
 
-	m_redLogo->setPosition(cocos2d::Point(m_redLogo->getContentSize().width / 2, -m_redLogo->getContentSize().height / 2 + visibleSize.height) + offsetFromCorner);	//Set pos to top left corner
-	m_blueLogo->setPosition(cocos2d::Point(m_blueLogo->getContentSize().width / 2, -m_blueLogo->getContentSize().height / 2 + visibleSize.height) + offsetFromCorner);	//Set pos to top left corner
+	for each(Player* player in PlayerManager::GetInstance()->GetPlayers())
+	{
+		std::string logoName = "Hud/" + player->GetLogoName();
+		m_factionLogos.push_back(cocos2d::Sprite::create(logoName));
+	}
+
+	for (int i = 0; i < m_factionLogos.size(); i++)
+	{
+		m_factionLogos[i]->setPosition(cocos2d::Point(m_factionLogos[i]->getContentSize().width / 2, -m_factionLogos[i]->getContentSize().height / 2 + visibleSize.height) + offsetFromCorner);	//Set pos to top left corner
+		m_factionLogos[i]->setVisible(false);
+		this->addChild(m_factionLogos[i]);
+	}
+	m_factionLogos[0]->setVisible(true);
+
+	m_ticketFrame = cocos2d::Sprite::create("Hud/ticketHolder.png");
 	m_ticketFrame->setPosition(cocos2d::Point(visibleSize.width / 2,
 		-m_ticketFrame->getContentSize().height / 2 + visibleSize.height + offsetFromCorner.y));	//Set pos to top left corner
-
-	m_blueLogo->setVisible(false);
-
-	this->addChild(m_redLogo);
-	this->addChild(m_blueLogo);
 	this->addChild(m_ticketFrame);
 }
 
@@ -167,9 +172,11 @@ void HudLayer::EndTurnPressed(Ref *pSender)
 {
 	auto scene = getParent();
 	Game* game = (Game*)scene->getChildByName("GameLayer");
-	m_redLogo->setVisible(!m_redLogo->isVisible());
-	m_blueLogo->setVisible(!m_redLogo->isVisible());
+	m_factionLogos[game->m_currentPlayerID]->setVisible(false);
 	game->EndTurn();
+	m_factionLogos[game->m_currentPlayerID]->setVisible(true);
+
+
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
 

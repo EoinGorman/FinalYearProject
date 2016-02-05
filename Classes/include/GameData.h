@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include "PlayerManager.h"
 ////////////////////////////////////////////////////////////
 /// \brief A class that stores gameplay data
 /// 

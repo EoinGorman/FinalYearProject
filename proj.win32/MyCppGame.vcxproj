@@ -150,6 +150,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y</Command>
     <ClCompile Include="..\Classes\src\LevelTile.cpp" />
     <ClCompile Include="..\Classes\src\MainMenuScene.cpp" />
     <ClCompile Include="..\Classes\src\PauseScene.cpp" />
+    <ClCompile Include="..\Classes\src\Player.cpp" />
+    <ClCompile Include="..\Classes\src\PlayerManager.cpp" />
     <ClCompile Include="..\Classes\src\Unit.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -164,6 +166,8 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y</Command>
     <ClInclude Include="..\Classes\include\Leveltile.h" />
     <ClInclude Include="..\Classes\include\MainMenuScene.h" />
     <ClInclude Include="..\Classes\include\PauseScene.h" />
+    <ClInclude Include="..\Classes\include\Player.h" />
+    <ClInclude Include="..\Classes\include\PlayerManager.h" />
     <ClInclude Include="..\Classes\include\Unit.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>

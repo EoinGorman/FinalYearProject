@@ -18,17 +18,17 @@ public:
 
 	//Constructors
 	LevelObject();
-	LevelObject(LevelObject::Type type, cocos2d::Vec2 tile, int player);
+	LevelObject(LevelObject::Type type, cocos2d::Vec2 tile, Player* owner);
 
 	void AddSpriteToScene(cocos2d::Layer* layer);
 	Type GetType();
 	cocos2d::Vec2 GetPosition();
 
-	void SetOwner(int player);
-	int GetOwner();
+	void SetOwner(Player* owner);
+	Player* GetOwner();
 
 private:
-	int m_owner;
+	Player* m_owner;
 	cocos2d::Sprite* m_sprite;
 	cocos2d::Vec2 m_tile;
 	cocos2d::Vec2 m_position;
