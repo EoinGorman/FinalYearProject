@@ -2,6 +2,9 @@
 
 #include "cocos2d.h"
 
+class Unit;
+class LevelObject;
+
 class Player {
 public:
 	enum Faction
@@ -12,26 +15,24 @@ public:
 		yellow
 	};
 
-	enum Colour
-	{
-		original,
-		alt1,
-		alt2,
-		alt3
-	};
-
 	//Constructors
-	Player(int, Faction, Colour);
+	Player(int, Faction);
 	int GetId();
 	cocos2d::Color3B GetColour();
 	std::string GetLogoName();
+	void AddUnit(Unit*);
+	void AddBuilding(LevelObject*);
+
+	void StartTurn();
+	void EndTurn();
 
 private:
-	void SelectAltColour(Colour col);
 	int m_ID;
 	int m_turnsTillNextBuild;
 	int m_reinforcementTickets;
 	std::string m_logoSpriteName;
 	cocos2d::Color3B m_colour;
 	Faction m_faction;
+	std::vector<Unit*> m_units;
+	std::vector<LevelObject*> m_buildings;
 };

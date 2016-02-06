@@ -3,6 +3,8 @@
 #include "cocos2d.h"
 #include "GameData.h"
 
+class Player;
+
 class Unit {
 public:
 	enum MovementType
@@ -36,6 +38,7 @@ public:
 	Type GetType();
 	cocos2d::Vec2 GetPosition();
 	void SetUnitStats();
+	void SetColour(cocos2d::Color3B newColour);
 
 	Player* GetOwner();
 

@@ -1,12 +1,12 @@
 #pragma once
 
 #include "cocos2d.h"
-#include "GameData.h"
 ////////////////////////////////////////////////////////////
 /// \brief A class that stores gameplay data
 /// 
 ////////////////////////////////////////////////////////////
 
+class Player;
 
 class LevelObject {
 public:
@@ -24,6 +24,7 @@ public:
 	Type GetType();
 	cocos2d::Vec2 GetPosition();
 
+	void SetColour(cocos2d::Color3B);
 	void SetOwner(Player* owner);
 	Player* GetOwner();
 

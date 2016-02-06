@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cocos2d.h"
-#include "GameData.h"
 #include "LevelObject.h"
 #include "Unit.h"
 

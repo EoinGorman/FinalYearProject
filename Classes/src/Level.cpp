@@ -28,12 +28,12 @@ void Level::Load(cocos2d::Layer* layer)
 {
 	//1.	SELECT LEVEL AND THEN...	FYI: Use SetLevelToLoad() function
 	//Load the data for the current level
-	LevelLoader loader;
+	LevelLoader loader;  
 	loader.LoadLevel(m_levelToLoadName); 
 
 	//2.	SELECT CHARACTERS AND THEN...
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::red);
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::green);
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::yellow);
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::yellow);
 
 	//3.	LOAD ACTUAL LEVEL
 	cocos2d::Size visibleSize = cocos2d::Director::getInstance()->getVisibleSize();

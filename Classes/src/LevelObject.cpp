@@ -1,4 +1,6 @@
 #include "LevelObject.h"
+#include "GameData.h"
+#include "Player.h"
 
 LevelObject::LevelObject()
 {
@@ -42,11 +44,16 @@ void LevelObject::SetOwner(Player* owner)
 	m_owner = owner;
 	if (owner != NULL)
 	{
-		m_sprite->setColor(m_owner->GetColour());
+		owner->AddBuilding(this);
 	}
 }
 
 Player* LevelObject::GetOwner()
 {
 	return m_owner;
+}
+
+void LevelObject::SetColour(cocos2d::Color3B newColour)
+{
+	m_sprite->setColor(newColour);
 }

@@ -48,19 +48,19 @@ void PlayerManager::AddPlayer(Player::Faction faction)
 	switch (faction)
 	{
 	case Player::Faction::red:
-		m_players.push_back(new Player(playerId, faction, Player::Colour(m_redFactionCount)));
+		m_players.push_back(new Player(playerId, faction));
 		m_redFactionCount++;
 		break;
 	case Player::Faction::blue:
-		m_players.push_back(new Player(playerId, faction, Player::Colour(m_blueFactionCount)));
+		m_players.push_back(new Player(playerId, faction));
 		m_blueFactionCount++;
 		break;
 	case Player::Faction::green:
-		m_players.push_back(new Player(playerId, faction, Player::Colour(m_greenFactionCount)));
+		m_players.push_back(new Player(playerId, faction));
 		m_greenFactionCount++;
 		break;
 	case Player::Faction::yellow:
-		m_players.push_back(new Player(playerId, faction, Player::Colour(m_yellowFactionCount)));
+		m_players.push_back(new Player(playerId, faction));
 		m_yellowFactionCount++;
 		break;
 	}

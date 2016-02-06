@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "PlayerManager.h"
 #include <iostream>
 
 #define CameraSpeed 350
@@ -59,6 +60,13 @@ bool Game::init()
 	this->scheduleUpdate();
 	m_currentPlayerID = 0;
 	m_currentStage = TurnStage::Waiting;
+
+	for (int i = 0; i < PlayerManager::GetInstance()->GetPlayers().size(); i++)
+	{
+		PlayerManager::GetInstance()->GetPlayers()[i]->EndTurn();
+	}
+	
+	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
 
 	m_paused = false;
 	return true;
@@ -407,7 +415,9 @@ void Game::SpawnUnit(LevelTile* tile)
 	{
 		tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
 	}
-	tile->SetOccupyingUnit(new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)), this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
+	Unit* newUnit = new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
+	tile->SetOccupyingUnit(newUnit, this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
+	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->AddUnit(newUnit);	//Add to players unit list also
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
@@ -416,7 +426,9 @@ void Game::SpawnUnit(LevelTile* tile)
 void Game::EndTurn()
 {
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
+	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->EndTurn();
 	SetNextPlayer();
+	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
 
 	//Cancel
 	for each (LevelTile* tile in m_selectableTiles)

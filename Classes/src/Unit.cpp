@@ -1,5 +1,5 @@
 #include "Unit.h"
-#include "Leveltile.h"
+#include "Player.h"
 
 Unit::Unit()
 {
@@ -10,7 +10,8 @@ Unit::Unit()
 	m_position = cocos2d::Vec2(m_tile.x * ptr->m_tileSize, m_tile.y * ptr->m_tileSize);
 	SetUnitStats();
 	m_sprite->setPosition(m_position);
-	m_owner = 0;
+	m_sprite->setColor(cocos2d::Color3B(50, 50, 50));
+	m_owner = NULL;
 }
 
 Unit::Unit(Type type, cocos2d::Vec2 tile, Player* owner)
@@ -23,7 +24,7 @@ Unit::Unit(Type type, cocos2d::Vec2 tile, Player* owner)
 	m_position = cocos2d::Vec2(m_tile.x * ptr->m_tileSize, m_tile.y * ptr->m_tileSize);
 	SetUnitStats();
 	m_sprite->setPosition(m_position);
-	m_sprite->setColor(owner->GetColour());
+	m_sprite->setColor(m_owner->GetColour());
 }
  
 
@@ -102,4 +103,9 @@ cocos2d::Vec2 Unit::GetPosition()
 Player* Unit::GetOwner()
 {
 	return m_owner;
+}
+
+void Unit::SetColour(cocos2d::Color3B newColour)
+{
+	m_sprite->setColor(newColour);
 }

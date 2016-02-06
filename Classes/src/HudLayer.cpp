@@ -1,5 +1,6 @@
 #include "HudLayer.h"
 #include "GameScene.h"
+#include "PlayerManager.h"
 
 USING_NS_CC;
 

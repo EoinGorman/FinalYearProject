@@ -1,6 +1,8 @@
 #include "Player.h"
+#include "Unit.h"
+#include "LevelObject.h"
 
-Player::Player(int id, Player::Faction faction, Player::Colour colour)
+Player::Player(int id, Player::Faction faction)
 {
 	m_ID = id;
 	m_faction = faction;
@@ -18,27 +20,12 @@ Player::Player(int id, Player::Faction faction, Player::Colour colour)
 		m_logoSpriteName = "blueLogo.png";
 		break;
 	case Faction::green:
-		m_colour = cocos2d::Color3B::GREEN;
+		m_colour = cocos2d::Color3B(0, 128, 0);
 		m_logoSpriteName = "greenLogo.png";
 		break;
 	case Faction::yellow:
-		m_colour = cocos2d::Color3B::YELLOW;
+		m_colour = cocos2d::Color3B(255, 232, 0);
 		m_logoSpriteName = "yellowLogo.png";
-		break;
-	}
-
-	SelectAltColour(colour);
-}
-
-void Player::SelectAltColour(Colour col)
-{
-	switch (col)
-	{
-	case Player::alt1:
-		break;
-	case Player::alt2:
-		break;
-	case Player::alt3:
 		break;
 	}
 }
@@ -56,4 +43,40 @@ int Player::GetId()
 cocos2d::Color3B Player::GetColour()
 {
 	return m_colour;
+}
+
+void Player::AddUnit(Unit* unit)
+{
+	m_units.push_back(unit);
+}
+
+void Player::AddBuilding(LevelObject* building)
+{
+	m_buildings.push_back(building);
+}
+
+void Player::StartTurn()
+{
+	for (int i = 0; i < m_units.size(); i++)
+	{
+		m_units[i]->SetColour(m_colour);
+	}
+
+	for (int i = 0; i < m_buildings.size(); i++)
+	{
+		m_buildings[i]->SetColour(m_colour);
+	}
+}
+
+void Player::EndTurn()
+{
+	for (int i = 0; i < m_units.size(); i++)
+	{
+		m_units[i]->SetColour(cocos2d::Color3B(50,50,50));
+	}
+
+	for (int i = 0; i < m_buildings.size(); i++)
+	{
+		m_buildings[i]->SetColour(cocos2d::Color3B(50, 50, 50));
+	}
 }

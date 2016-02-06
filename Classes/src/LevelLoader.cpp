@@ -1,4 +1,5 @@
 #include "LevelLoader.h"
+#include "PlayerManager.h"
 
 ////////////////////////////////////////////////////////////
 LevelLoader::LevelLoader() 
