@@ -39,42 +39,52 @@ void Unit::SetUnitStats()
 	case soldier:
 		m_movementType = foot;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((0)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 3.0f;
 		break;
 	case mortarSquad:
 		m_movementType = foot;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((1)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 2.0f;
 		break;
 	case smallTank:
 		m_movementType = landVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((2)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 3.0f;
 		break;
 	case tBoat:
 		m_movementType = seaVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((3)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 4.0f;
 		break;
 	case tCopter:
 		m_movementType = airVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((4)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 5.0f;
 		break;
 	case soldier2:
 		m_movementType = foot;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((0)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 3.0f;
 		break;
 	case artillery:
 		m_movementType = landVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((1)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 3.0f;
 		break;
 	case largeTank:
 		m_movementType = landVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((2)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 3.0f;
 		break;
 	case attackBoat:
 		m_movementType = seaVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((3)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 4.0f;
 		break;
 	case attackCopter:
 		m_movementType = airVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((4)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
+		m_sightRange = 5.0f;
 		break;
 	}
 
@@ -82,7 +92,6 @@ void Unit::SetUnitStats()
 	m_attackPower = 4.0f;
 	m_attackRange = 1.0f;
 	m_moveRange = 4.0f;
-	m_sightRange = 3.0f;
 }
 
 void Unit::AddSpriteToScene(cocos2d::Layer* layer)
@@ -108,4 +117,14 @@ Player* Unit::GetOwner()
 void Unit::SetColour(cocos2d::Color3B newColour)
 {
 	m_sprite->setColor(newColour);
+}
+
+cocos2d::Vec2 Unit::GetTileIndex()
+{
+	return m_tile;
+}
+
+void Unit::SetInSight(bool value)
+{
+	m_sprite->setVisible(value);
 }

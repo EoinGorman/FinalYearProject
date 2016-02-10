@@ -20,13 +20,14 @@ public:
 
 	//Constructors
 	LevelTile();
-	LevelTile(LevelTile::Type type, cocos2d::Vec2 position);
+	LevelTile(LevelTile::Type type, cocos2d::Vec2 position, cocos2d::Vec2 index);
 	~LevelTile();
 
-	void AddSpriteToScene(cocos2d::Layer* layer);
+	void AddSpritesToScene(cocos2d::Layer* layer);
 	Type GetType();
-	cocos2d::Vec2 GetPosition();
 	cocos2d::Sprite* GetSprite();
+	cocos2d::Vec2 GetPosition();
+	cocos2d::Vec2 GetIndex();
 
 	//Buildings
 	bool HasObject();
@@ -38,13 +39,22 @@ public:
 	Unit* GetOccupyingUnit();
 	void SetOccupyingUnit(Unit* unit, cocos2d::Layer* layer);
 
+	void ActivateAltSprite(std::string reason, bool value);
+	void SetInSight(bool value);
+	void SetChecked(bool value);
+	bool GetChecked();
+
 private:
 	cocos2d::Sprite* m_sprite;
+	cocos2d::Sprite* m_altSprite;
 	cocos2d::Vec2 m_position;
+	cocos2d::Vec2 m_index;
 	Type m_type;
 	bool m_hasObject;
 	LevelObject* m_object;
 
 	bool m_hasUnit;
 	Unit* m_unit;
+
+	bool m_checked;
 };

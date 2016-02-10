@@ -31,6 +31,9 @@ public:
 	bool IsMoveableTile(Unit::Type unitType, LevelTile::Type tyleType);
 	bool IsAttackableUnit(Unit::Type unitType, Unit::MovementType otherUnitType);
 	void SetLevelToLoad(std::string levelName);
+	std::vector<LevelTile*> GetNeighbourTiles(LevelTile*);
+	LevelTile* GetTileAtIndex(cocos2d::Vec2 index);
+
 private:
 	Level();
 	static bool instanceFlag;

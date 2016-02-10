@@ -23,6 +23,7 @@ public:
 	void AddSpriteToScene(cocos2d::Layer* layer);
 	Type GetType();
 	cocos2d::Vec2 GetPosition();
+	cocos2d::Vec2 GetTileIndex();
 
 	void SetColour(cocos2d::Color3B);
 	void SetOwner(Player* owner);

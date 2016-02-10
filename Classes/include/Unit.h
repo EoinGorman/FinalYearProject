@@ -39,7 +39,8 @@ public:
 	cocos2d::Vec2 GetPosition();
 	void SetUnitStats();
 	void SetColour(cocos2d::Color3B newColour);
-
+	cocos2d::Vec2 GetTileIndex();
+	void SetInSight(bool value);
 	Player* GetOwner();
 
 	float m_health;	//All units have 10 health - displayed as an int in game

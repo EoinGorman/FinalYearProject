@@ -80,3 +80,14 @@ void Player::EndTurn()
 		m_buildings[i]->SetColour(cocos2d::Color3B(50, 50, 50));
 	}
 }
+
+
+std::vector<Unit*> Player::GetUnits()
+{
+	return m_units;
+}
+
+std::vector<LevelObject*> Player::GetBuildings()
+{
+	return m_buildings;
+}

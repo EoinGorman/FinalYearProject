@@ -67,6 +67,7 @@ bool Game::init()
 	}
 	
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
+	SetVisibleTiles();
 
 	m_paused = false;
 	return true;
@@ -251,7 +252,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 				//Cancel spawn
 				for each (LevelTile* tile in m_selectableTiles)
 				{
-					tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
+					tile->ActivateAltSprite("", false);
 				}
 				m_selectableTiles.clear();
 				m_currentStage = Waiting;
@@ -290,7 +291,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 				//Cancel spawn
 				for each (LevelTile* tile in m_selectableTiles)
 				{
-					tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
+					tile->ActivateAltSprite("", false);
 				}
 				m_selectableTiles.clear();
 				m_currentStage = Waiting;
@@ -384,7 +385,7 @@ void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unit
 		{
 			if (Level::GetInstance()->IsMoveableTile(unitType, tile->GetType()))
 			{
-				tile->GetSprite()->setColor(cocos2d::Color3B(100, 100, 255));
+				tile->ActivateAltSprite("Spawning", true);
 				m_selectableTiles.push_back(tile);
 			}
 		}
@@ -394,8 +395,54 @@ void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unit
 void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 {
 	//Select all tiles within distance of currentTile
+	int checkCount = 0;
 	int distance = unit->m_moveRange;
+	std::vector<LevelTile*> tilesToCheck;
+	std::vector<LevelTile*> tilesToReset;
 
+	tilesToCheck.push_back(currentTile); 
+	//currentTile->GetSprite()->setColor(cocos2d::Color3B(25, 25, 0));	//Dont think I want to set colour here...
+	currentTile->SetChecked(true);
+	m_selectableTiles.push_back(currentTile);	//Place here because this tile is good to move to
+	tilesToReset.push_back(currentTile);
+
+	while (checkCount < distance)
+	{
+		std::vector<LevelTile*> validTiles;
+		for (int i = 0; i < tilesToCheck.size(); i++)
+		{
+			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
+			for (int j = 0; j < neighbourTiles.size(); j++)
+			{
+				bool tileHasFriendlyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() == PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+				if (!neighbourTiles[j]->GetChecked() && (!neighbourTiles[j]->HasUnit() || tileHasFriendlyUnit))
+				{
+					if (Level::GetInstance()->IsMoveableTile(unit->GetType(), neighbourTiles[j]->GetType()))
+					{
+						neighbourTiles[j]->SetChecked(true);
+						if (!tileHasFriendlyUnit)
+						{
+							neighbourTiles[j]->ActivateAltSprite("Moving", true);
+							m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+						}
+						validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+						tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
+					}
+				}
+			}
+		}
+		tilesToCheck.clear();
+		tilesToCheck = validTiles;
+		checkCount++;
+	}
+
+	for each (LevelTile* tile in tilesToReset)
+	{
+		tile->SetChecked(false);
+	}
+	tilesToReset.clear();
+
+	/*
 	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
 	{
 		if (Level::GetInstance()->GetGameDistanceBetweenTiles(currentTile, tile) <= distance && !tile->HasUnit())	//If within range and has no unit
@@ -407,13 +454,14 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 			}
 		}
 	}
+	*/
 }
 
 void Game::SpawnUnit(LevelTile* tile)
 {
 	for each (LevelTile* tile in m_selectableTiles)
 	{
-		tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
+		tile->ActivateAltSprite("", false);
 	}
 	Unit* newUnit = new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
 	tile->SetOccupyingUnit(newUnit, this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
@@ -421,6 +469,8 @@ void Game::SpawnUnit(LevelTile* tile)
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
+
+	SetVisibleTiles();
 }
 
 void Game::EndTurn()
@@ -433,12 +483,14 @@ void Game::EndTurn()
 	//Cancel
 	for each (LevelTile* tile in m_selectableTiles)
 	{
-		tile->GetSprite()->setColor(cocos2d::Color3B(255, 255, 255));
+		tile->ActivateAltSprite("", false);
 	}
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	m_levelTileSelected = NULL;
 	TogglePauseMenu();
+
+	SetVisibleTiles();
 }
 
 void Game::TogglePauseMenu()
@@ -476,4 +528,78 @@ void Game::SetNextPlayer()
 	{
 		m_currentPlayerID++;
 	}
+}
+
+void Game::SetVisibleTiles()
+{
+	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
+	{
+		tile->SetInSight(false);
+	}
+
+	for each (LevelTile* tile in GetAllFOWVisibleTiles())
+	{
+		tile->SetInSight(true);
+	}
+}
+
+std::vector<LevelTile*> Game::GetAllFOWVisibleTiles()
+{
+	std::vector<LevelTile*> visibleTiles;
+	Player* currentPlayer = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+
+	for each (Unit* unit in currentPlayer->GetUnits())
+	{
+		std::vector<LevelTile*> tilesInSight = GetAllTilesInSightRange(Level::GetInstance()->GetTileAtIndex(unit->GetTileIndex()), unit);
+		for each (LevelTile* tile in tilesInSight)
+		{
+			visibleTiles.push_back(tile);
+		}
+	}
+
+	for each (LevelObject* building in currentPlayer->GetBuildings())
+	{
+		visibleTiles.push_back(Level::GetInstance()->GetTileAtIndex(building->GetTileIndex()));
+	}
+	return visibleTiles;
+}
+
+std::vector<LevelTile*> Game::GetAllTilesInSightRange(LevelTile* currentTile, Unit* unit)
+{
+	//Select all tiles within distance of currentTile
+	int checkCount = 0;
+	int distance = unit->m_sightRange;
+	std::vector<LevelTile*> tilesToCheck;
+	std::vector<LevelTile*> tilesInSight;
+
+	currentTile->SetChecked(true);
+	tilesToCheck.push_back(currentTile);
+	tilesInSight.push_back(currentTile);
+
+	while (checkCount < distance)
+	{
+		std::vector<LevelTile*> validTiles;
+		for (int i = 0; i < tilesToCheck.size(); i++)
+		{
+			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
+			for (int j = 0; j < neighbourTiles.size(); j++)
+			{
+				if (!neighbourTiles[j]->GetChecked())
+				{
+					neighbourTiles[j]->SetChecked(true);
+					validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+					tilesInSight.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that are in sight
+				}
+			}
+		}
+		tilesToCheck.clear();
+		tilesToCheck = validTiles;
+		checkCount++;
+	}
+
+	for each (LevelTile* tile in tilesInSight)
+	{
+		tile->SetChecked(false);
+	}
+	return tilesInSight;
 }

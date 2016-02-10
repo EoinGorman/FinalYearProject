@@ -57,3 +57,8 @@ void LevelObject::SetColour(cocos2d::Color3B newColour)
 {
 	m_sprite->setColor(newColour);
 }
+
+cocos2d::Vec2 LevelObject::GetTileIndex()
+{
+	return m_tile;
+}

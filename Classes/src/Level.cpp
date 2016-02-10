@@ -32,8 +32,8 @@ void Level::Load(cocos2d::Layer* layer)
 	loader.LoadLevel(m_levelToLoadName); 
 
 	//2.	SELECT CHARACTERS AND THEN...
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::yellow);
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::yellow);
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::blue);
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::red);
 
 	//3.	LOAD ACTUAL LEVEL
 	cocos2d::Size visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
@@ -54,8 +54,8 @@ void Level::Load(cocos2d::Layer* layer)
 	{
 		for (int j = 0; j < ptr->m_width; j++)
 		{
-			m_levelTerrain.push_back(new LevelTile(LevelTile::Type(terrainTypes[count]), cocos2d::Vec2(ptr->m_tileSize * j, ptr->m_tileSize * i)));
-			m_levelTerrain[count]->AddSpriteToScene(layer);
+			m_levelTerrain.push_back(new LevelTile(LevelTile::Type(terrainTypes[count]), cocos2d::Vec2(ptr->m_tileSize * j, ptr->m_tileSize * i), cocos2d::Vec2(j,i)));
+			m_levelTerrain[count]->AddSpritesToScene(layer);
 			count++;
 		}
 	}
@@ -206,4 +206,46 @@ bool Level::IsAttackableUnit(Unit::Type unitType, Unit::MovementType otherUnitTy
 void Level::SetLevelToLoad(std::string levelName)
 {
 	m_levelToLoadName = levelName;
+}
+
+LevelTile* Level::GetTileAtIndex(cocos2d::Vec2 index) 
+{
+	for (int i = 0; i < m_levelTerrain.size(); i++)
+	{
+		if (m_levelTerrain[i]->GetIndex() == index)
+		{
+			return m_levelTerrain[i];
+		}
+	}
+	return NULL;
+}
+
+std::vector<LevelTile*> Level::GetNeighbourTiles(LevelTile* tile)
+{
+	std::vector<LevelTile*> neighbourTiles;
+
+	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
+	cocos2d::Vec2 tileIndex = tile->GetIndex();
+
+	if (tileIndex.x > 0)	//Can Check Left
+	{
+		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x - 1, tileIndex.y)));
+	}
+
+	if (tileIndex.x < ptr->m_width - 1)	//Can Check Right
+	{
+		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x + 1, tileIndex.y)));
+	}
+
+	if (tileIndex.y > 0)	//Can Check Above
+	{
+		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x, tileIndex.y - 1)));
+	}
+
+	if (tileIndex.y < ptr->m_height - 1)	//Can Check Below
+	{
+		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x, tileIndex.y + 1)));
+	}
+
+	return neighbourTiles;
 }

@@ -45,6 +45,9 @@ public:
 
 	void SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType);
 	void SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit);
+	void SetVisibleTiles();
+	std::vector<LevelTile*> GetAllFOWVisibleTiles();
+	std::vector<LevelTile*> GetAllTilesInSightRange(LevelTile* currentTile, Unit* unit);
 	void SpawnUnit(LevelTile* tile);
 	void EndTurn();
 	void TogglePauseMenu();

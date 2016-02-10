@@ -23,6 +23,9 @@ public:
 	void AddUnit(Unit*);
 	void AddBuilding(LevelObject*);
 
+	std::vector<Unit*> GetUnits();
+	std::vector<LevelObject*> GetBuildings();
+
 	void StartTurn();
 	void EndTurn();
 
