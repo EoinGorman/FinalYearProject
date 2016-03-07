@@ -43,6 +43,18 @@ public:
 	void SetInSight(bool value);
 	void SetChecked(bool value);
 	bool GetChecked();
+	void SetInPath(bool value);
+	bool GetInPath();
+
+	void ResetSearchVariables();
+	void SetCostVariables(float costTo, float costFrom);
+
+	void SetParent(LevelTile* parent);
+	LevelTile* GetParent();
+	float GetTotalCost() const;
+	float GetCostToThis();
+	float GetCostToGoal();
+	float GetMovementCost();
 
 private:
 	cocos2d::Sprite* m_sprite;
@@ -50,6 +62,7 @@ private:
 	cocos2d::Vec2 m_position;
 	cocos2d::Vec2 m_index;
 	Type m_type;
+	float m_movementCost;
 	bool m_hasObject;
 	LevelObject* m_object;
 
@@ -57,4 +70,10 @@ private:
 	Unit* m_unit;
 
 	bool m_checked;
+	bool m_inPath;
+
+	LevelTile* m_parent;
+	float m_totalCost;	//"F" value
+	float m_costToThis;	//"G" value
+	float m_costToGoal;	//"H" value
 };

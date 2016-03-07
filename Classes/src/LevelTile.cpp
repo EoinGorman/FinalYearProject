@@ -2,11 +2,14 @@
 
 LevelTile::LevelTile()
 {
+	ResetSearchVariables();
+	m_inPath = false;
 	m_checked = false;
 	m_hasObject = false;
 	m_object = NULL;
 	m_hasUnit = false;
 	m_unit = NULL;
+	m_movementCost = 50;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 
 	m_type = Type::Grass;
@@ -17,11 +20,14 @@ LevelTile::LevelTile()
 
 LevelTile::LevelTile(Type type, cocos2d::Vec2 position, cocos2d::Vec2 index)
 {
-	m_checked = false;
+	ResetSearchVariables();
+	m_inPath = false;
 	m_hasObject = false;
 	m_object = NULL;
 	m_hasUnit = false;
 	m_unit = NULL;
+	m_movementCost = 50;
+
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	m_type = type;
 	m_position = position;
@@ -128,6 +134,16 @@ bool LevelTile::GetChecked()
 	return m_checked;
 }
 
+void LevelTile::SetInPath(bool value)
+{
+	m_inPath = value;
+}
+
+bool LevelTile::GetInPath()
+{
+	return m_inPath;
+}
+
 void LevelTile::SetInSight(bool value)
 {
 	if (value)
@@ -167,4 +183,52 @@ void LevelTile::ActivateAltSprite(std::string reason, bool value)
 	{
 		m_altSprite->setColor(cocos2d::Color3B::WHITE);
 	}
+}
+
+
+void LevelTile::ResetSearchVariables()
+{
+	m_checked = false;
+	m_costToThis = 0;
+	m_costToGoal = 0;
+	m_totalCost = 0;
+	m_parent = NULL;
+}
+
+void LevelTile::SetCostVariables(float costTo, float costFrom)
+{
+	m_checked = true;
+	m_costToThis = costTo;
+	m_costToGoal = costFrom;
+	m_totalCost = m_costToThis + m_costToGoal;
+}
+
+void LevelTile::SetParent(LevelTile* parent)
+{
+	m_parent = parent;
+}
+
+LevelTile* LevelTile::GetParent()
+{
+	return m_parent;
+}
+
+float LevelTile::GetTotalCost() const
+{
+	return m_totalCost;
+}
+
+float LevelTile::GetCostToThis()
+{
+	return m_costToThis;
+}
+
+float LevelTile::GetCostToGoal()
+{
+	return m_costToGoal;
+}
+
+float LevelTile::GetMovementCost()
+{
+	return m_movementCost;
 }

@@ -91,7 +91,7 @@ void Unit::SetUnitStats()
 	m_baseDefence = 1.0f;
 	m_attackPower = 4.0f;
 	m_attackRange = 1.0f;
-	m_moveRange = 4.0f;
+	m_moveRange = 1.0f;
 }
 
 void Unit::AddSpriteToScene(cocos2d::Layer* layer)

@@ -1,5 +1,15 @@
 #include "Level.h"
 #include "PlayerManager.h"
+#include <algorithm>
+
+//Tile comparison predicate
+struct CompareTotalCost
+{
+	bool operator()(const LevelTile* lhs, const LevelTile* rhs) const
+	{
+		return lhs->GetTotalCost() > rhs->GetTotalCost();
+	}
+};
 
 bool Level::instanceFlag = false;
 Level* Level::instance = NULL;
@@ -28,8 +38,8 @@ void Level::Load(cocos2d::Layer* layer)
 {
 	//1.	SELECT LEVEL AND THEN...	FYI: Use SetLevelToLoad() function
 	//Load the data for the current level
-	LevelLoader loader;  
-	loader.LoadLevel(m_levelToLoadName); 
+	LevelLoader loader;
+	loader.LoadLevel(m_levelToLoadName);
 
 	//2.	SELECT CHARACTERS AND THEN...
 	PlayerManager::GetInstance()->AddPlayer(Player::Faction::blue);
@@ -49,12 +59,12 @@ void Level::Load(cocos2d::Layer* layer)
 
 	//Create and place tiles 
 	std::vector<int> terrainTypes = ptr->m_levelTerrain;
-	int count = 0; 
+	int count = 0;
 	for (int i = 0; i < ptr->m_height; i++)
 	{
 		for (int j = 0; j < ptr->m_width; j++)
 		{
-			m_levelTerrain.push_back(new LevelTile(LevelTile::Type(terrainTypes[count]), cocos2d::Vec2(ptr->m_tileSize * j, ptr->m_tileSize * i), cocos2d::Vec2(j,i)));
+			m_levelTerrain.push_back(new LevelTile(LevelTile::Type(terrainTypes[count]), cocos2d::Vec2(ptr->m_tileSize * j, ptr->m_tileSize * i), cocos2d::Vec2(j, i)));
 			m_levelTerrain[count]->AddSpritesToScene(layer);
 			count++;
 		}
@@ -81,7 +91,7 @@ void Level::Load(cocos2d::Layer* layer)
 					m_levelObjects.push_back(new LevelObject(LevelObject::Type(objectTypes[count]), cocos2d::Vec2(j, i), NULL));
 				}
 
-				m_levelObjects[m_levelObjects.size()-1]->AddSpriteToScene(layer);
+				m_levelObjects[m_levelObjects.size() - 1]->AddSpriteToScene(layer);
 				m_levelTerrain[count]->SetOccupyingObject(m_levelObjects[m_levelObjects.size() - 1]);	//Give terrain tile a reference to the object on top of it
 			}
 			count++;
@@ -208,7 +218,7 @@ void Level::SetLevelToLoad(std::string levelName)
 	m_levelToLoadName = levelName;
 }
 
-LevelTile* Level::GetTileAtIndex(cocos2d::Vec2 index) 
+LevelTile* Level::GetTileAtIndex(cocos2d::Vec2 index)
 {
 	for (int i = 0; i < m_levelTerrain.size(); i++)
 	{
@@ -248,4 +258,99 @@ std::vector<LevelTile*> Level::GetNeighbourTiles(LevelTile* tile)
 	}
 
 	return neighbourTiles;
+}
+
+std::vector<LevelTile*> Level::GetPath(LevelTile* start, LevelTile* goal, std::vector<LevelTile*> availableTiles)
+{
+	std::vector<LevelTile*> path = std::vector<LevelTile*>();
+
+	std::vector<LevelTile*> closedList = std::vector<LevelTile*>();
+	//Create a queue that will keep the tile with lowest totalCost at the front
+	std::priority_queue<LevelTile*, std::vector<LevelTile*>, CompareTotalCost> openList =
+		std::priority_queue<LevelTile*, std::vector<LevelTile*>, CompareTotalCost>();
+
+	start->SetParent(NULL);
+	openList.push(start);
+	openList.top()->SetCostVariables(GetDistanceSoFar(openList.top()), GetManhattanDistance(openList.top(), goal));
+
+	while (openList.top() != goal)
+	{
+		//Add top tile to closed list and remove from open list
+		LevelTile* currentTile = openList.top();
+		closedList.push_back(currentTile);
+		openList.pop();
+
+		for each (LevelTile* tile in GetNeighbourTiles(currentTile))
+		{
+			if (std::find(availableTiles.begin(), availableTiles.end(), tile) != availableTiles.end())
+			{
+				if (!tile->GetChecked())
+				{
+					tile->SetParent(currentTile);
+					tile->SetCostVariables(GetDistanceSoFar(tile), GetManhattanDistance(tile, goal));
+					openList.push(tile);
+				}
+				else if (tile->GetParent() != NULL)
+				{
+					if (tile->GetCostToThis() > tile->GetParent()->GetCostToThis() + tile->GetMovementCost())
+					{
+						// Change its parent and g score
+						tile->SetParent(currentTile);
+						tile->SetCostVariables(GetDistanceSoFar(tile), GetManhattanDistance(tile, goal));
+					}
+				}
+				if (openList.size() == 0)
+				{
+					return std::vector<LevelTile*>();
+				}
+			}
+		}
+	}
+
+	//Construct path
+	path.push_back(goal);	//Add goal tile to path
+	while (goal->GetParent() != NULL)
+	{
+		path.push_back(goal->GetParent());
+		goal = goal->GetParent();
+	}
+
+	//Reverse vector
+	std::reverse(path.begin(), path.end());
+
+	//Reset All Tile Values
+	for each (LevelTile* tile in availableTiles)
+	{
+		tile->ResetSearchVariables();
+	}
+
+
+	return path;
+}
+
+void Level::AddToPath(std::vector<LevelTile*> path)
+{
+
+}
+
+void Level::RemoveFromPath(std::vector<LevelTile*> path)
+{
+
+}
+
+float Level::GetManhattanDistance(LevelTile * current, LevelTile* goal)
+{
+	//Gets distance between tiles
+	float distance = current->GetPosition().distance(goal->GetPosition());
+	return distance;
+}
+
+float Level::GetDistanceSoFar(LevelTile* current)
+{
+	float distance = current->GetMovementCost();
+	if (current->GetParent() != NULL)
+	{
+		distance += GetDistanceSoFar(current->GetParent());
+	}
+	return distance;
 }

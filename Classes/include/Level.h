@@ -34,6 +34,7 @@ public:
 	std::vector<LevelTile*> GetNeighbourTiles(LevelTile*);
 	LevelTile* GetTileAtIndex(cocos2d::Vec2 index);
 
+	std::vector<LevelTile*> GetPath(LevelTile* start, LevelTile* goal, std::vector<LevelTile*> availableTiles);
 private:
 	Level();
 	static bool instanceFlag;
@@ -43,4 +44,9 @@ private:
 	std::vector<LevelTile*> m_levelTerrain;
 	std::vector<LevelObject*> m_levelObjects;
 	cocos2d::Sprite* m_background;
+
+	void AddToPath(std::vector<LevelTile*> path);
+	void RemoveFromPath(std::vector<LevelTile*> path);
+	float GetManhattanDistance(LevelTile* start, LevelTile* goal);
+	float GetDistanceSoFar(LevelTile*);
 };

@@ -69,6 +69,7 @@ bool Game::init()
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
 	SetVisibleTiles();
 
+	m_path = std::vector<LevelTile*>();
 	m_paused = false;
 	return true;
 }
@@ -198,6 +199,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					//If player has clicked a tile with unit on it
 					if (tile->HasUnit() && tile->GetOccupyingUnit()->GetOwner()->GetId() == m_currentPlayerID)
 					{
+						m_unitSelected = tile->GetOccupyingUnit();
 						SetSelectableTilesForMoving(tile, tile->GetOccupyingUnit());
 						m_currentStage = ChoosingMove;
 					}
@@ -241,7 +243,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					if (!tile->HasUnit())
 					{
 						SpawnUnit(tile);
-						m_levelTileSelected = NULL;
+						m_levelTileSelected = tile;
 						break;
 					}
 				}
@@ -257,6 +259,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 				m_selectableTiles.clear();
 				m_currentStage = Waiting;
 				m_levelTileSelected = NULL;
+				m_unitSelected = NULL;
 				break;
 
 			}
@@ -279,8 +282,21 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					if (!tile->HasUnit())
 					{
 						clickCanceled = false;
-						m_levelTileSelected = NULL;
+						m_unitSelected = NULL;
+						m_levelTileSelected = tile;
 						//Move selected unit to here
+						m_path = Level::GetInstance()->GetPath(tile, Level::GetInstance()->GetTiles()[0], Level::GetInstance()->GetTiles());
+
+						m_path.clear();
+
+						//Reset to waiting
+						for each (LevelTile* tile in m_selectableTiles)
+						{
+							tile->ActivateAltSprite("", false);
+							tile->SetInPath(false);
+						}
+						m_selectableTiles.clear();
+						m_currentStage = Waiting;
 						break;
 					}
 				}
@@ -292,10 +308,13 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 				for each (LevelTile* tile in m_selectableTiles)
 				{
 					tile->ActivateAltSprite("", false);
+					tile->SetInPath(false);
 				}
 				m_selectableTiles.clear();
 				m_currentStage = Waiting;
 				m_levelTileSelected = NULL;
+				m_unitSelected = NULL;
+				m_path.clear();
 				break;
 			}
 			break;
@@ -315,62 +334,42 @@ void Game::onTouchCancelled(cocos2d::Touch* touch, cocos2d::Event* event)
 
 void Game::onMouseMove(Event *event)
 {
-	/*
+	EventMouse* e = (EventMouse*)event;
+	Vec2 mousePos = e->getLocationInView();
+	mousePos.y += ScreenHeight;
+
 	if (!m_paused)
 	{
-		EventMouse* e = (EventMouse*)event;
-		Vec2 touchLocation = e->getLocationInView();//event->getLocation();
-		Vec2 center = Vec2(ScreenWidth / 2, -ScreenHeight / 2);
+		std::shared_ptr<GameData> ptr = GameData::sharedGameData();
+		CCRect rect = CCRectMake(0, 0, ptr->m_tileSize, ptr->m_tileSize);
 
-		center.subtract(touchLocation);
-
-		if (ScreenHeight >= ScreenWidth)
+		switch (m_currentStage)
 		{
-			if (center.length() > (ScreenWidth / 10 * 9) / 2)
+		case Waiting:
+			break;
+		case ChoosingSpawn:
+			break;
+		case ChoosingMove:
+			for each (LevelTile* tile in m_selectableTiles)
 			{
-				cameraDirection = center.getNormalized();
-				return;
+				rect.setRect(
+					(tile->GetSprite()->getPosition().x - rect.size.width / 2) + this->getPositionX(),
+					(tile->GetSprite()->getPosition().y - rect.size.height / 2) + this->getPositionY(),
+					rect.size.width,
+					rect.size.height);
+				if (rect.containsPoint(mousePos))
+				{
+					m_path.push_back(tile);
+					tile->SetInPath(true);
+					tile->ActivateAltSprite("", true);
+					break;
+				}
 			}
-		}
-
-		else
-		{
-			if (center.length() > (ScreenHeight / 10 * 9) / 2)
-			{
-				cameraDirection = center.getNormalized();
-				return;
-			}
-		}
-
-		cameraDirection = Vec2(0, 0);
-
-		if (touchLocation.x < ScreenWidth / 10)
-		{
-		cameraDirection.x = 1;
-		}
-		else if (touchLocation.x > (ScreenWidth / 10) * 9)
-		{
-		cameraDirection.x = -1;
-		}
-		else
-		{
-		cameraDirection.x = 0;
-		}
-
-		if (touchLocation.y > -(ScreenHeight / 10))
-		{
-		cameraDirection.y = -1;
-		}
-		else if (touchLocation.y < -(ScreenHeight / 10 * 9))
-		{
-		cameraDirection.y = 1;
-		}
-		else
-		{
-		cameraDirection.y = 0;
+			break;
+		case ChoosingAttack:
+			break;
 		}
 	}
-		*/
 }
 
 
@@ -403,7 +402,7 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 	tilesToCheck.push_back(currentTile); 
 	//currentTile->GetSprite()->setColor(cocos2d::Color3B(25, 25, 0));	//Dont think I want to set colour here...
 	currentTile->SetChecked(true);
-	m_selectableTiles.push_back(currentTile);	//Place here because this tile is good to move to
+	//m_selectableTiles.push_back(currentTile);	//Place here because this tile is good to move to
 	tilesToReset.push_back(currentTile);
 
 	while (checkCount < distance)
@@ -488,6 +487,7 @@ void Game::EndTurn()
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	m_levelTileSelected = NULL;
+	m_unitSelected = NULL;
 	TogglePauseMenu();
 
 	SetVisibleTiles();

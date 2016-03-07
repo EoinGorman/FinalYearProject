@@ -58,6 +58,8 @@ public:
 
 private:
 	void SetNextPlayer();
+	Unit* m_unitSelected;
 	Unit::Type m_unitTypeSelected;
 	LevelTile* m_levelTileSelected;
+	std::vector<LevelTile*> m_path;
 };
