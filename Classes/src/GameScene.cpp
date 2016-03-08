@@ -200,6 +200,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					if (tile->HasUnit() && tile->GetOccupyingUnit()->GetOwner()->GetId() == m_currentPlayerID)
 					{
 						m_unitSelected = tile->GetOccupyingUnit();
+						m_levelTileSelected = tile;
 						SetSelectableTilesForMoving(tile, tile->GetOccupyingUnit());
 						m_currentStage = ChoosingMove;
 					}
@@ -285,16 +286,19 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 						m_unitSelected = NULL;
 						m_levelTileSelected = tile;
 						//Move selected unit to here
-						m_path = Level::GetInstance()->GetPath(tile, Level::GetInstance()->GetTiles()[0], Level::GetInstance()->GetTiles());
-
+						for each (LevelTile* tile in m_path)
+						{
+							tile->ActivateAltSprite("", false);
+							tile->SetInPath(false);
+						}
 						m_path.clear();
 
 						//Reset to waiting
 						for each (LevelTile* tile in m_selectableTiles)
 						{
 							tile->ActivateAltSprite("", false);
-							tile->SetInPath(false);
 						}
+
 						m_selectableTiles.clear();
 						m_currentStage = Waiting;
 						break;
@@ -305,16 +309,20 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 			if (clickCanceled)
 			{
 				//Cancel spawn
-				for each (LevelTile* tile in m_selectableTiles)
+				for each (LevelTile* tile in m_path)
 				{
 					tile->ActivateAltSprite("", false);
 					tile->SetInPath(false);
 				}
+				for each (LevelTile* tile in m_selectableTiles)
+				{
+					tile->ActivateAltSprite("", false);
+				}
 				m_selectableTiles.clear();
+				m_path.clear();
 				m_currentStage = Waiting;
 				m_levelTileSelected = NULL;
 				m_unitSelected = NULL;
-				m_path.clear();
 				break;
 			}
 			break;
@@ -357,12 +365,38 @@ void Game::onMouseMove(Event *event)
 					(tile->GetSprite()->getPosition().y - rect.size.height / 2) + this->getPositionY(),
 					rect.size.width,
 					rect.size.height);
-				if (rect.containsPoint(mousePos))
+				if (rect.containsPoint(mousePos) && !tile->GetInPath())
 				{
-					m_path.push_back(tile);
+					for each (LevelTile* t in m_path)
+					{
+						t->SetInPath(false);
+
+						if (!t->HasUnit())
+						{
+							t->ActivateAltSprite("Moving", true);
+						}
+						else
+						{
+							t->ActivateAltSprite("", false);
+						}
+					}
+
+					m_path = Level::GetInstance()->GetPath(m_levelTileSelected, tile, m_selectableTiles);
 					tile->SetInPath(true);
-					tile->ActivateAltSprite("", true);
+
+					for each (LevelTile* t in m_path)
+					{
+						t->ActivateAltSprite("", true);
+					}
+					if (tile->HasUnit())
+					{
+						tile->ActivateAltSprite("Attacking", true);
+					}
 					break;
+				}
+				else
+				{
+					tile->SetInPath(false);
 				}
 			}
 			break;
@@ -422,8 +456,8 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 						if (!tileHasFriendlyUnit)
 						{
 							neighbourTiles[j]->ActivateAltSprite("Moving", true);
-							m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
 						}
+						m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
 						validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
 						tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
 					}

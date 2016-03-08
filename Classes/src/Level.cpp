@@ -260,7 +260,7 @@ std::vector<LevelTile*> Level::GetNeighbourTiles(LevelTile* tile)
 	return neighbourTiles;
 }
 
-std::vector<LevelTile*> Level::GetPath(LevelTile* start, LevelTile* goal, std::vector<LevelTile*> availableTiles)
+std::vector<LevelTile*> Level::GetPath(LevelTile* start, LevelTile* goal, std::list<LevelTile*> availableTiles)
 {
 	std::vector<LevelTile*> path = std::vector<LevelTile*>();
 

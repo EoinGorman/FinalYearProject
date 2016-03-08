@@ -34,7 +34,7 @@ public:
 	std::vector<LevelTile*> GetNeighbourTiles(LevelTile*);
 	LevelTile* GetTileAtIndex(cocos2d::Vec2 index);
 
-	std::vector<LevelTile*> GetPath(LevelTile* start, LevelTile* goal, std::vector<LevelTile*> availableTiles);
+	std::vector<LevelTile*> GetPath(LevelTile* start, LevelTile* goal, std::list<LevelTile*> availableTiles);
 private:
 	Level();
 	static bool instanceFlag;
