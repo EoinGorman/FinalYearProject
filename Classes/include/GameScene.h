@@ -22,6 +22,7 @@ public:
 		Waiting,
 		ChoosingSpawn,
 		ChoosingMove,
+		Moving,
 		ChoosingAttack
 	};
 	bool m_paused;

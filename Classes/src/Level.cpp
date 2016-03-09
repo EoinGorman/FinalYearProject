@@ -42,8 +42,8 @@ void Level::Load(cocos2d::Layer* layer)
 	loader.LoadLevel(m_levelToLoadName);
 
 	//2.	SELECT CHARACTERS AND THEN...
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::blue);
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::red);
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::yellow);
+	PlayerManager::GetInstance()->AddPlayer(Player::Faction::green);
 
 	//3.	LOAD ACTUAL LEVEL
 	cocos2d::Size visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
@@ -319,6 +319,7 @@ std::vector<LevelTile*> Level::GetPath(LevelTile* start, LevelTile* goal, std::l
 	std::reverse(path.begin(), path.end());
 
 	//Reset All Tile Values
+	start->ResetSearchVariables();
 	for each (LevelTile* tile in availableTiles)
 	{
 		tile->ResetSearchVariables();

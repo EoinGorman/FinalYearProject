@@ -33,15 +33,21 @@ public:
 	//Constructors
 	Unit();
 	Unit(Unit::Type type, cocos2d::Vec2 tile, Player* owner);
+	bool MoveToward(cocos2d::Vec2 target);
 
 	void AddSpriteToScene(cocos2d::Layer* layer);
 	Type GetType();
 	cocos2d::Vec2 GetPosition();
 	void SetUnitStats();
 	void SetColour(cocos2d::Color3B newColour);
+	void SetTileIndex(cocos2d::Vec2);
 	cocos2d::Vec2 GetTileIndex();
 	void SetInSight(bool value);
 	Player* GetOwner();
+	void StartTurn(cocos2d::Color3B colour);
+	void EndTurn();
+	bool GetMoved();
+	void SetMoved(bool value);
 
 	float m_health;	//All units have 10 health - displayed as an int in game
 	float m_baseDefence;	//Defence of unit type
@@ -50,7 +56,6 @@ public:
 	float m_attackRange;
 	float m_moveRange;
 	float m_sightRange;
-	bool moved;
 
 private:
 	Player* m_owner;
@@ -60,4 +65,5 @@ private:
 	cocos2d::Sprite* m_sprite;
 	cocos2d::Vec2 m_tile;
 	cocos2d::Vec2 m_position;
+	bool m_moved;
 };

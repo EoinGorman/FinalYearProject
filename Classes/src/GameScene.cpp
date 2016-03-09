@@ -102,6 +102,27 @@ void Game::update(float delta)
 		{
 
 		}
+		switch (m_currentStage)
+		{
+		case Waiting:
+			break;
+		case Moving:
+			if (m_unitSelected->MoveToward(m_path[0]->GetPosition()))
+			{
+				if (m_path.size() == 1)
+				{
+					m_path[0]->SetOccupyingUnit(m_unitSelected, this);
+					m_path.erase(m_path.begin());
+					m_currentStage = Waiting;
+					m_unitSelected->SetMoved(true);
+					m_unitSelected = NULL;
+					SetVisibleTiles();
+					break;
+				}
+				m_path.erase(m_path.begin());
+			}
+			break;
+		}
 	}
 }
 
@@ -125,7 +146,7 @@ void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event 
 		}
 	}
 
-	//Temp end turn key
+	//Camera movement
 	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_W)
 	{
 		cameraDirection.y -= 1;
@@ -199,10 +220,13 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					//If player has clicked a tile with unit on it
 					if (tile->HasUnit() && tile->GetOccupyingUnit()->GetOwner()->GetId() == m_currentPlayerID)
 					{
-						m_unitSelected = tile->GetOccupyingUnit();
-						m_levelTileSelected = tile;
-						SetSelectableTilesForMoving(tile, tile->GetOccupyingUnit());
-						m_currentStage = ChoosingMove;
+						if (!tile->GetOccupyingUnit()->GetMoved())
+						{
+							m_unitSelected = tile->GetOccupyingUnit();
+							m_levelTileSelected = tile;
+							SetSelectableTilesForMoving(tile, tile->GetOccupyingUnit());
+							m_currentStage = ChoosingMove;
+						}
 					}
 
 					//If player has clicked a tile with building on it
@@ -283,15 +307,15 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					if (!tile->HasUnit())
 					{
 						clickCanceled = false;
-						m_unitSelected = NULL;
+						m_levelTileSelected->RemoveOccupyingUnit();
 						m_levelTileSelected = tile;
+
 						//Move selected unit to here
 						for each (LevelTile* tile in m_path)
 						{
 							tile->ActivateAltSprite("", false);
 							tile->SetInPath(false);
 						}
-						m_path.clear();
 
 						//Reset to waiting
 						for each (LevelTile* tile in m_selectableTiles)
@@ -300,7 +324,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 						}
 
 						m_selectableTiles.clear();
-						m_currentStage = Waiting;
+						m_currentStage = Moving;
 						break;
 					}
 				}
@@ -469,7 +493,7 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 		checkCount++;
 	}
 
-	for each (LevelTile* tile in tilesToReset)
+	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
 	{
 		tile->SetChecked(false);
 	}
@@ -497,7 +521,7 @@ void Game::SpawnUnit(LevelTile* tile)
 		tile->ActivateAltSprite("", false);
 	}
 	Unit* newUnit = new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
-	tile->SetOccupyingUnit(newUnit, this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
+	tile->BuildUnitHere(newUnit, this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->AddUnit(newUnit);	//Add to players unit list also
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
@@ -518,6 +542,7 @@ void Game::EndTurn()
 	{
 		tile->ActivateAltSprite("", false);
 	}
+	m_path.clear();
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	m_levelTileSelected = NULL;
@@ -606,7 +631,10 @@ std::vector<LevelTile*> Game::GetAllTilesInSightRange(LevelTile* currentTile, Un
 	std::vector<LevelTile*> tilesToCheck;
 	std::vector<LevelTile*> tilesInSight;
 
-	currentTile->SetChecked(true);
+
+	std::vector<LevelTile*> td = Level::GetInstance()->GetTiles();
+
+	currentTile->SetChecked(true);	
 	tilesToCheck.push_back(currentTile);
 	tilesInSight.push_back(currentTile);
 
@@ -631,7 +659,7 @@ std::vector<LevelTile*> Game::GetAllTilesInSightRange(LevelTile* currentTile, Un
 		checkCount++;
 	}
 
-	for each (LevelTile* tile in tilesInSight)
+	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
 	{
 		tile->SetChecked(false);
 	}

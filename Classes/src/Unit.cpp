@@ -1,10 +1,12 @@
 #include "Unit.h"
 #include "Player.h"
 
+#define MovedTint 0.4
+
 Unit::Unit()
 {
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
-	moved = true;
+	m_moved = false;
 	m_tile = cocos2d::Vec2(0,0);
 	m_type = soldier;
 	m_position = cocos2d::Vec2(m_tile.x * ptr->m_tileSize, m_tile.y * ptr->m_tileSize);
@@ -18,7 +20,7 @@ Unit::Unit(Type type, cocos2d::Vec2 tile, Player* owner)
 {
 	m_owner = owner;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
-	moved = true;
+	m_moved = false;
 	m_tile = tile;
 	m_type = type;
 	m_position = cocos2d::Vec2(m_tile.x * ptr->m_tileSize, m_tile.y * ptr->m_tileSize);
@@ -26,7 +28,23 @@ Unit::Unit(Type type, cocos2d::Vec2 tile, Player* owner)
 	m_sprite->setPosition(m_position);
 	m_sprite->setColor(m_owner->GetColour());
 }
- 
+
+bool Unit::MoveToward(cocos2d::Vec2 target)
+{
+	cocos2d::Vec2 direction = target - m_position;
+	direction.normalize();
+
+	m_position += direction * 5;
+	m_sprite->setPosition(m_position);
+
+	if (m_position.distance(target) <= direction.length() * 5)
+	{
+		m_position = target;
+		m_sprite->setPosition(m_position);
+		return true;
+	}
+	return false;
+}
 
 void Unit::SetUnitStats()
 {
@@ -119,6 +137,11 @@ void Unit::SetColour(cocos2d::Color3B newColour)
 	m_sprite->setColor(newColour);
 }
 
+void Unit::SetTileIndex(cocos2d::Vec2 index)
+{
+	m_tile = index;
+}
+
 cocos2d::Vec2 Unit::GetTileIndex()
 {
 	return m_tile;
@@ -127,4 +150,67 @@ cocos2d::Vec2 Unit::GetTileIndex()
 void Unit::SetInSight(bool value)
 {
 	m_sprite->setVisible(value);
+}
+
+void Unit::StartTurn(cocos2d::Color3B colour)
+{
+	m_moved = false;
+	SetColour(colour);
+}
+
+void Unit::EndTurn()
+{
+	SetColour(cocos2d::Color3B(50, 50, 50));
+}
+
+bool Unit::GetMoved()
+{
+	return m_moved;
+}
+
+void Unit::SetMoved(bool value)
+{
+	m_moved = value;
+	if (value)
+	{
+		//If moved set tint so Unit is visibly unselectable
+		cocos2d::Color3B newColour = m_owner->GetColour();
+
+		newColour.r *= MovedTint;
+		newColour.g *= MovedTint;
+		newColour.b *= MovedTint;
+		/*
+		//Alter R value
+		if (newColour.r >= MovedTint)
+		{
+			newColour.r -= MovedTint;
+		}
+		else
+		{
+			newColour.r = 0;
+		}
+
+		//Alter G value
+		if (newColour.g >= MovedTint)
+		{
+			newColour.g -= MovedTint;
+		}
+		else
+		{
+			newColour.g = 0;
+		}
+
+		//Alter B value
+		if (newColour.b >= MovedTint)
+		{
+			newColour.b -= MovedTint;
+		}
+		else
+		{
+			newColour.b = 0;
+		}
+		*/
+
+		SetColour(newColour);
+	}
 }

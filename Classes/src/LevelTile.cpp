@@ -22,6 +22,7 @@ LevelTile::LevelTile(Type type, cocos2d::Vec2 position, cocos2d::Vec2 index)
 {
 	ResetSearchVariables();
 	m_inPath = false;
+	m_checked = false;
 	m_hasObject = false;
 	m_object = NULL;
 	m_hasUnit = false;
@@ -117,10 +118,24 @@ Unit* LevelTile::GetOccupyingUnit()
 	return NULL;
 }
 
+void LevelTile::RemoveOccupyingUnit()
+{
+	m_hasUnit = false;
+	m_unit = NULL;
+}
+
 void LevelTile::SetOccupyingUnit(Unit* unit, cocos2d::Layer* layer)
 {
 	m_hasUnit = true;
 	m_unit = unit;
+	m_unit->SetTileIndex(m_index);
+}
+
+void LevelTile::BuildUnitHere(Unit* unit, cocos2d::Layer* layer)
+{
+	m_hasUnit = true;
+	m_unit = unit;
+	m_unit->SetTileIndex(m_index);
 	m_unit->AddSpriteToScene(layer);
 }
 
@@ -188,7 +203,7 @@ void LevelTile::ActivateAltSprite(std::string reason, bool value)
 
 void LevelTile::ResetSearchVariables()
 {
-	m_checked = false;
+	SetChecked(false);
 	m_costToThis = 0;
 	m_costToGoal = 0;
 	m_totalCost = 0;
@@ -197,7 +212,7 @@ void LevelTile::ResetSearchVariables()
 
 void LevelTile::SetCostVariables(float costTo, float costFrom)
 {
-	m_checked = true;
+	SetChecked(true);
 	m_costToThis = costTo;
 	m_costToGoal = costFrom;
 	m_totalCost = m_costToThis + m_costToGoal;

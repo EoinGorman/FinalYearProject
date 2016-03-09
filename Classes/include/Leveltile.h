@@ -32,12 +32,14 @@ public:
 	//Buildings
 	bool HasObject();
 	LevelObject* GetOccupyingObject();
+	void RemoveOccupyingUnit();
 	void SetOccupyingObject(LevelObject* levelObject);
 
 	//Units
 	bool HasUnit();
-	Unit* GetOccupyingUnit();
+	Unit* GetOccupyingUnit(); 
 	void SetOccupyingUnit(Unit* unit, cocos2d::Layer* layer);
+	void BuildUnitHere(Unit* unit, cocos2d::Layer* layer);
 
 	void ActivateAltSprite(std::string reason, bool value);
 	void SetInSight(bool value);

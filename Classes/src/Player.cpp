@@ -59,7 +59,7 @@ void Player::StartTurn()
 {
 	for (int i = 0; i < m_units.size(); i++)
 	{
-		m_units[i]->SetColour(m_colour);
+		m_units[i]->StartTurn(m_colour);
 	}
 
 	for (int i = 0; i < m_buildings.size(); i++)
@@ -72,7 +72,7 @@ void Player::EndTurn()
 {
 	for (int i = 0; i < m_units.size(); i++)
 	{
-		m_units[i]->SetColour(cocos2d::Color3B(50,50,50));
+		m_units[i]->EndTurn();
 	}
 
 	for (int i = 0; i < m_buildings.size(); i++)
