@@ -23,7 +23,8 @@ public:
 	void AddUnit(Unit*);
 	void AddBuilding(LevelObject*);
 
-	std::vector<Unit*> GetUnits();
+	std::vector<Unit*> GetUnits(); 
+	LevelObject* GetBase();
 	std::vector<LevelObject*> GetBuildings();
 
 	void StartTurn();
@@ -37,5 +38,6 @@ private:
 	cocos2d::Color3B m_colour;
 	Faction m_faction;
 	std::vector<Unit*> m_units;
+	LevelObject* m_base;
 	std::vector<LevelObject*> m_buildings;
 };

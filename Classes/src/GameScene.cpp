@@ -587,6 +587,10 @@ void Game::SetNextPlayer()
 	{
 		m_currentPlayerID++;
 	}
+
+	//move camera
+	Vec2 basePos = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetBase()->GetPosition();
+	this->setPosition(-basePos + Vec2(ScreenWidth/2, ScreenHeight/2));
 }
 
 void Game::SetVisibleTiles()

@@ -23,6 +23,9 @@ public:
 	void HudLayer::ToggleBuildMenu();
 	bool HudLayer::IsBuildMenuVisible();
 
+	void HudLayer::ToggleUnitMenu();
+	bool HudLayer::IsUnitMenuVisible();
+
 	CREATE_FUNC(HudLayer);
 
 private:

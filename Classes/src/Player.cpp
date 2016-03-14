@@ -8,6 +8,7 @@ Player::Player(int id, Player::Faction faction)
 	m_faction = faction;
 	m_turnsTillNextBuild = 0;
 	m_reinforcementTickets = 100;
+	m_base = NULL;
 
 	switch (m_faction)
 	{
@@ -53,6 +54,11 @@ void Player::AddUnit(Unit* unit)
 void Player::AddBuilding(LevelObject* building)
 {
 	m_buildings.push_back(building);
+
+	if (building->GetType() == LevelObject::HQ && m_base == NULL)
+	{
+		m_base = building;
+	}
 }
 
 void Player::StartTurn()
@@ -81,10 +87,14 @@ void Player::EndTurn()
 	}
 }
 
-
 std::vector<Unit*> Player::GetUnits()
 {
 	return m_units;
+}
+
+LevelObject* Player::GetBase()
+{
+	return m_base;
 }
 
 std::vector<LevelObject*> Player::GetBuildings()

@@ -206,3 +206,14 @@ bool HudLayer::IsBuildMenuVisible()
 {
 	return m_buildBackground->isVisible();
 }
+
+
+void HudLayer::ToggleUnitMenu()
+{
+
+}
+
+bool HudLayer::IsUnitMenuVisible()
+{
+	return false;
+}

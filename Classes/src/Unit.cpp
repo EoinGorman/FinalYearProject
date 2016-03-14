@@ -5,6 +5,8 @@
 
 Unit::Unit()
 {
+	m_healthLabel = cocos2d::LabelTTF::create("10", "fonts/Akashi.ttf", 18, cocos2d::Size(25, 25));
+
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	m_moved = false;
 	m_tile = cocos2d::Vec2(0,0);
@@ -18,6 +20,9 @@ Unit::Unit()
 
 Unit::Unit(Type type, cocos2d::Vec2 tile, Player* owner)
 {
+
+	m_healthLabel = cocos2d::LabelTTF::create("10", "fonts/Akashi.ttf", 18, cocos2d::Size(25, 25));
+
 	m_owner = owner;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	m_moved = false;
@@ -106,6 +111,8 @@ void Unit::SetUnitStats()
 		break;
 	}
 
+	m_sprite->addChild(m_healthLabel);
+	m_healthLabel->setPosition(cocos2d::Vec2(ptr->m_tileSize * 0.85f, ptr->m_tileSize * 0.15f));
 	m_baseDefence = 1.0f;
 	m_attackPower = 4.0f;
 	m_attackRange = 1.0f;
@@ -115,6 +122,7 @@ void Unit::SetUnitStats()
 void Unit::AddSpriteToScene(cocos2d::Layer* layer)
 {
 	layer->addChild(m_sprite, -1);
+	//layer->addChild(m_healthLabel, -1);
 }
 
 Unit::Type Unit::GetType()

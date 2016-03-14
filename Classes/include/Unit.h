@@ -62,6 +62,7 @@ private:
 	MovementType m_movementType;
 	Type m_type;
 
+	cocos2d::LabelTTF* m_healthLabel;
 	cocos2d::Sprite* m_sprite;
 	cocos2d::Vec2 m_tile;
 	cocos2d::Vec2 m_position;
