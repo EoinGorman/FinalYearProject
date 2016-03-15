@@ -140,6 +140,10 @@ void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event 
 		{
 			ToggleBuildMenu();
 		}
+		else if (hud->IsUnitMenuVisible())
+		{
+			ToggleUnitMenu();
+		}
 		else
 		{
 			TogglePauseMenu();
@@ -223,9 +227,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 						if (!tile->GetOccupyingUnit()->GetMoved())
 						{
 							m_unitSelected = tile->GetOccupyingUnit();
-							m_levelTileSelected = tile;
-							SetSelectableTilesForMoving(tile, tile->GetOccupyingUnit());
-							m_currentStage = ChoosingMove;
+							ToggleUnitMenu();
 						}
 					}
 
@@ -668,4 +670,26 @@ std::vector<LevelTile*> Game::GetAllTilesInSightRange(LevelTile* currentTile, Un
 		tile->SetChecked(false);
 	}
 	return tilesInSight;
+}
+
+void Game::ToggleUnitMenu()
+{
+	m_paused = !m_paused;
+	auto scene = getParent();
+	HudLayer* hud = (HudLayer*)scene->getChildByName("HudLayer");
+	hud->ToggleUnitMenu(m_unitSelected);
+}
+
+void Game::BeginUnitMove()
+{
+	m_levelTileSelected = Level::GetInstance()->GetTileAtIndex(m_unitSelected->GetTileIndex());
+	SetSelectableTilesForMoving(m_levelTileSelected, m_levelTileSelected->GetOccupyingUnit());
+	m_currentStage = ChoosingMove;
+	ToggleUnitMenu();
+}
+
+void Game::BeginUnitAttack()
+{
+	m_currentStage = Waiting;	//TEMP
+	ToggleUnitMenu();
 }

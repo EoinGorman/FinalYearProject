@@ -86,6 +86,32 @@ void HudLayer::CreateBuildMenu()
 
 }
 
+void HudLayer::CreateUnitMenu()
+{
+
+	// Returns visible size of OpenGL window in points.
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+
+	// create a menu item
+	auto moveItem = MenuItemImage::create("Hud/moveButtonDefault.png", "Hud/moveButtonClicked.png",
+		CC_CALLBACK_0(HudLayer::MovePressed, this));
+
+	auto attackItem = MenuItemImage::create("Hud/attackButtonDefault.png", "Hud/attackButtonClicked.png",
+		CC_CALLBACK_0(HudLayer::AttackPressed, this));
+
+	auto menu = Menu::create(moveItem, attackItem, NULL);
+	menu->setName("UnitMenu");
+	menu->setVisible(false);
+	menu->alignItemsVerticallyWithPadding(10);
+
+	//Add Background
+	m_unitBackground = cocos2d::Sprite::create("Hud/unitPopUp.png");
+	m_unitBackground->setVisible(false);
+
+	this->addChild(m_unitBackground);
+	this->addChild(menu, 1);
+}
+
 void HudLayer::CreateHud()
 {
 	// Returns visible size of OpenGL window in points.
@@ -124,6 +150,7 @@ bool HudLayer::init()
 	CreateHud();
 	CreatePauseMenu();
 	CreateBuildMenu();
+	CreateUnitMenu();
 
 	//Create Key Listener
 	auto listener = EventListenerKeyboard::create();
@@ -177,7 +204,6 @@ void HudLayer::EndTurnPressed(Ref *pSender)
 	game->EndTurn();
 	m_factionLogos[game->m_currentPlayerID]->setVisible(true);
 
-
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
 
@@ -197,6 +223,21 @@ void HudLayer::BuildUnit(Unit::Type type)
 }
 
 
+void HudLayer::MovePressed()
+{
+	auto scene = getParent();
+	Game* game = (Game*)scene->getChildByName("GameLayer");
+	game->BeginUnitMove();
+}
+
+void HudLayer::AttackPressed()
+{
+	auto scene = getParent();
+	Game* game = (Game*)scene->getChildByName("GameLayer");
+	game->BeginUnitAttack();
+}
+
+
 bool HudLayer::IsPauseMenuVisible()
 {
 	return m_pauseBackground->isVisible();
@@ -208,12 +249,26 @@ bool HudLayer::IsBuildMenuVisible()
 }
 
 
-void HudLayer::ToggleUnitMenu()
+void HudLayer::ToggleUnitMenu(Unit* unit)
 {
+	m_currentUnit = unit;
+	Menu* unitMenu = (Menu*)this->getChildByName("UnitMenu");
+	unitMenu->setVisible(!unitMenu->isVisible());
+	m_unitBackground->setVisible(!m_unitBackground->isVisible());
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 
+	if (unit != NULL)
+	{
+		auto scene = getParent();
+		Game* game = (Game*)scene->getChildByName("GameLayer");
+		Vec2 unitPosInScreenSpace = unit->GetPosition() + game->getPosition();
+
+		unitMenu->setPosition(unitPosInScreenSpace);
+		m_unitBackground->setPosition(unitPosInScreenSpace);
+	}
 }
 
 bool HudLayer::IsUnitMenuVisible()
 {
-	return false;
+	return m_unitBackground->isVisible();
 }

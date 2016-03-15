@@ -55,6 +55,11 @@ public:
 	void ToggleBuildMenu();
 	void SetUnitTypeSelected(Unit::Type);
 	
+
+	void Game::ToggleUnitMenu();
+	void Game::BeginUnitMove();
+	void Game::BeginUnitAttack();
+
 	CREATE_FUNC(Game);
 
 private:
