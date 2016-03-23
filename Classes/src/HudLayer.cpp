@@ -93,8 +93,9 @@ void HudLayer::CreateUnitMenu()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 
 	// create a menu item
-	auto moveItem = MenuItemImage::create("Hud/moveButtonDefault.png", "Hud/moveButtonClicked.png",
+	auto moveItem = MenuItemImage::create("Hud/moveButtonDefault.png", "Hud/moveButtonClicked.png", "Hud/moveButtonDisabled.png",
 		CC_CALLBACK_0(HudLayer::MovePressed, this));
+	moveItem->setName("MoveButton");
 
 	auto attackItem = MenuItemImage::create("Hud/attackButtonDefault.png", "Hud/attackButtonClicked.png",
 		CC_CALLBACK_0(HudLayer::AttackPressed, this));
@@ -265,6 +266,18 @@ void HudLayer::ToggleUnitMenu(Unit* unit)
 
 		unitMenu->setPosition(unitPosInScreenSpace);
 		m_unitBackground->setPosition(unitPosInScreenSpace);
+
+		MenuItemImage* moveButton = (MenuItemImage*)unitMenu->getChildByName("MoveButton");
+		if (unit->GetMoved())
+		{
+			moveButton->setEnabled(false);
+			//->setColor(cocos2d::Color3B(50, 50, 50));
+		}
+		else
+		{
+			moveButton->setEnabled(true);
+			//moveButton->setColor(cocos2d::Color3B::WHITE);
+		}
 	}
 }
 

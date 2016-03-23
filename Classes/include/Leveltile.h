@@ -58,6 +58,8 @@ public:
 	float GetCostToGoal();
 	float GetMovementCost();
 
+	float m_defenceBonus;
+
 private:
 	cocos2d::Sprite* m_sprite;
 	cocos2d::Sprite* m_altSprite;

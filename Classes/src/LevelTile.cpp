@@ -45,7 +45,8 @@ LevelTile::LevelTile(Type type, cocos2d::Vec2 position, cocos2d::Vec2 index)
 	m_altSprite = cocos2d::Sprite::create("altTile.png");
 	m_altSprite->setPosition(m_position);
 	m_altSprite->setContentSize(cocos2d::Size(ptr->m_tileSize, ptr->m_tileSize));
-	//m_altSprite->setColor(cocos2d::Color4B(255, 255, 255, 100));
+
+	m_defenceBonus = 1.0f;
 }
 
 
@@ -101,6 +102,13 @@ void LevelTile::SetOccupyingObject(LevelObject* levelObject)
 {
 	m_hasObject = true;
 	m_object = levelObject;
+
+	m_defenceBonus++;
+
+	if (m_object->GetType() == LevelObject::City)
+	{
+		m_defenceBonus++;
+	}
 }
 
 //Units

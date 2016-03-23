@@ -26,6 +26,7 @@ public:
 	std::vector<Unit*> GetUnits(); 
 	LevelObject* GetBase();
 	std::vector<LevelObject*> GetBuildings();
+	void RemoveUnit(Unit* unit);
 
 	void StartTurn();
 	void EndTurn();

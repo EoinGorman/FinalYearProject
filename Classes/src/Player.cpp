@@ -101,3 +101,8 @@ std::vector<LevelObject*> Player::GetBuildings()
 {
 	return m_buildings;
 }
+
+void Player::RemoveUnit(Unit* unit)
+{
+	m_units.erase(std::remove(m_units.begin(), m_units.end(), unit));
+}

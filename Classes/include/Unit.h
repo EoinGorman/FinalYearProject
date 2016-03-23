@@ -48,9 +48,13 @@ public:
 	void EndTurn();
 	bool GetMoved();
 	void SetMoved(bool value);
+	bool GetUsed();
+	void SetUsed(bool value);
+	float GetHealth();
+	void Alterhealth(float value);
+	void RemoveFromLayer();
 
 	float m_health;	//All units have 10 health - displayed as an int in game
-	float m_baseDefence;	//Defence of unit type
 	float m_defence;	//Defence of unit and tile combined
 	float m_attackPower;
 	float m_attackRange;
@@ -67,4 +71,5 @@ private:
 	cocos2d::Vec2 m_tile;
 	cocos2d::Vec2 m_position;
 	bool m_moved;
+	bool m_used;
 };

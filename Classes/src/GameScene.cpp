@@ -129,45 +129,47 @@ void Game::update(float delta)
 //KEY LISTENERS
 void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
 {
-	//Escape Key will Pause Game
-	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_ESCAPE)
+	if (m_currentStage != Moving)
 	{
-
-		auto scene = getParent();
-		HudLayer* hud = (HudLayer*)scene->getChildByName("HudLayer");
-
-		if (hud->IsBuildMenuVisible())
+		//Escape Key will Pause Game
+		if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_ESCAPE)
 		{
-			ToggleBuildMenu();
-		}
-		else if (hud->IsUnitMenuVisible())
-		{
-			ToggleUnitMenu();
-		}
-		else
-		{
-			TogglePauseMenu();
+			auto scene = getParent();
+			HudLayer* hud = (HudLayer*)scene->getChildByName("HudLayer");
+
+			if (hud->IsBuildMenuVisible())
+			{
+				ToggleBuildMenu();
+			}
+			else if (hud->IsUnitMenuVisible())
+			{
+				ToggleUnitMenu();
+			}
+			else
+			{
+				TogglePauseMenu();
+			}
 		}
 	}
 
-	//Camera movement
-	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_W)
-	{
-		cameraDirection.y -= 1;
-	}
-	else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_S)
-	{
-		cameraDirection.y += 1;
-	}
-	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_A)
-	{
+		//Camera movement
+		if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_W)
+		{
+			cameraDirection.y -= 1;
+		}
+		else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_S)
+		{
+			cameraDirection.y += 1;
+		}
+		if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_A)
+		{
 
-		cameraDirection.x += 1;
-	}
-	else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_D)
-	{
-		cameraDirection.x -= 1;
-	}
+			cameraDirection.x += 1;
+		}
+		else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_D)
+		{
+			cameraDirection.x -= 1;
+		}
 }
 
 void Game::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
@@ -224,7 +226,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					//If player has clicked a tile with unit on it
 					if (tile->HasUnit() && tile->GetOccupyingUnit()->GetOwner()->GetId() == m_currentPlayerID)
 					{
-						if (!tile->GetOccupyingUnit()->GetMoved())
+						if (!tile->GetOccupyingUnit()->GetUsed())
 						{
 							m_unitSelected = tile->GetOccupyingUnit();
 							ToggleUnitMenu();
@@ -239,13 +241,6 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 							//Select unit to build ---
 							m_levelTileSelected = tile;
 							ToggleBuildMenu();
-							/*
-							Unit::Type unitType = Unit::Type::smallTank;
-							//
-							SetSelectableTilesForSpawning(tile, unitType);
-							m_currentStage = ChoosingSpawn;
-							CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/selectBuildingSound.wav", false, 1.0f, 1.0f, 1.0f);
-							*/
 						}
 					}
 				}
@@ -353,6 +348,61 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 			}
 			break;
 		case ChoosingAttack:
+
+			//Wait for player to click an appropriate tile
+			for each (LevelTile* tile in m_selectableTiles)
+			{
+				rect.setRect(
+					(tile->GetPosition().x - rect.size.width / 2) + this->getPositionX(),
+					(tile->GetPosition().y - rect.size.height / 2) + this->getPositionY(),
+					rect.size.width,
+					rect.size.height);
+				if (rect.containsPoint(touch->getLocation()))
+				{
+					std::cout << "Selectable Tile Clicked: " << tile->GetType();
+
+					//If player has clicked a tile with anoother unit on it
+					if (tile->HasUnit())
+					{
+						clickCanceled = false;
+						m_levelTileSelected = tile;
+
+						//ATTACK OTHER UNIT
+						UnitAttack(m_unitSelected, tile->GetOccupyingUnit());
+
+						//Reset to waiting
+						for each (LevelTile* tile in m_selectableTiles)
+						{
+							tile->ActivateAltSprite("", false);
+						}
+
+						m_selectableTiles.clear();
+						m_currentStage = Waiting;
+						break;
+					}
+				}
+			}
+
+			if (clickCanceled)
+			{
+				//Cancel spawn
+				for each (LevelTile* tile in m_path)
+				{
+					tile->ActivateAltSprite("", false);
+					tile->SetInPath(false);
+				}
+				for each (LevelTile* tile in m_selectableTiles)
+				{
+					tile->ActivateAltSprite("", false);
+				}
+				m_selectableTiles.clear();
+				m_path.clear();
+				m_currentStage = Waiting;
+				m_levelTileSelected = NULL;
+				m_unitSelected = NULL;
+				break;
+			}
+
 			break;
 		}
 	}
@@ -500,20 +550,53 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 		tile->SetChecked(false);
 	}
 	tilesToReset.clear();
+}
 
-	/*
-	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
+void Game::SetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit)
+{
+	//Select all tiles within distance of currentTile
+	int checkCount = 0;
+	int distance = unit->m_attackRange;
+	std::vector<LevelTile*> tilesToCheck;
+	std::vector<LevelTile*> tilesToReset;
+
+	tilesToCheck.push_back(currentTile);
+	currentTile->SetChecked(true);
+	tilesToReset.push_back(currentTile);
+
+	while (checkCount < distance)
 	{
-		if (Level::GetInstance()->GetGameDistanceBetweenTiles(currentTile, tile) <= distance && !tile->HasUnit())	//If within range and has no unit
+		std::vector<LevelTile*> validTiles;
+		for (int i = 0; i < tilesToCheck.size(); i++)
 		{
-			if (Level::GetInstance()->IsMoveableTile(unit->GetType(), tile->GetType()))
+			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
+			for (int j = 0; j < neighbourTiles.size(); j++)
 			{
-				tile->GetSprite()->setColor(cocos2d::Color3B(100, 100, 255));
-				m_selectableTiles.push_back(tile);
+				if (!neighbourTiles[j]->GetChecked())
+				{
+					neighbourTiles[j]->SetChecked(true);
+
+					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					if (tileHasEnemyUnit)
+					{
+						neighbourTiles[j]->ActivateAltSprite("Attacking", true);
+						m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+					}
+					validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+					tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
+				}
 			}
 		}
+		tilesToCheck.clear();
+		tilesToCheck = validTiles;
+		checkCount++;
 	}
-	*/
+
+	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
+	{
+		tile->SetChecked(false);
+	}
+	tilesToReset.clear();
 }
 
 void Game::SpawnUnit(LevelTile* tile)
@@ -690,6 +773,39 @@ void Game::BeginUnitMove()
 
 void Game::BeginUnitAttack()
 {
-	m_currentStage = Waiting;	//TEMP
+	m_levelTileSelected = Level::GetInstance()->GetTileAtIndex(m_unitSelected->GetTileIndex());
+	SetSelectableTilesForAttacking(m_levelTileSelected, m_levelTileSelected->GetOccupyingUnit());
+	if (m_selectableTiles.size() == 0)
+	{
+		m_currentStage = Waiting;
+		m_levelTileSelected = NULL;
+		m_unitSelected = NULL;
+	}
+	else
+	{
+		m_currentStage = ChoosingAttack;
+	}
 	ToggleUnitMenu();
+}
+
+void Game::UnitAttack(Unit* attackingUnit, Unit* otherUnit)
+{
+	//Calculate attack based off health as well... LATER
+	float attackingPower = attackingUnit->m_attackPower;
+
+	float defence = otherUnit->m_defence;
+	defence += m_levelTileSelected->m_defenceBonus;
+
+	if (attackingPower - defence > 0)
+	{
+		otherUnit->Alterhealth(-attackingPower);
+		if (otherUnit->GetHealth() <= 0)
+		{
+			m_levelTileSelected->RemoveOccupyingUnit();
+			otherUnit->RemoveFromLayer();
+			otherUnit->GetOwner()->RemoveUnit(otherUnit);
+			delete otherUnit;
+		}
+	}
+	attackingUnit->SetUsed(true);
 }
