@@ -1,6 +1,8 @@
 #include "Player.h"
 #include "Unit.h"
 #include "LevelObject.h"
+#include "cocos2d.h"
+#include "GameScene.h"
 
 Player::Player(int id, Player::Faction faction)
 {
@@ -9,6 +11,7 @@ Player::Player(int id, Player::Faction faction)
 	m_turnsTillNextBuild = 0;
 	m_reinforcementTickets = 100;
 	m_base = NULL;
+	m_lastCameraPos = cocos2d::Vec2(0, 0);
 
 	switch (m_faction)
 	{
@@ -74,7 +77,7 @@ void Player::StartTurn()
 	}
 }
 
-void Player::EndTurn()
+void Player::EndTurn(Game* game)
 {
 	for (int i = 0; i < m_units.size(); i++)
 	{
@@ -85,6 +88,8 @@ void Player::EndTurn()
 	{
 		m_buildings[i]->SetColour(cocos2d::Color3B(50, 50, 50));
 	}
+	
+	m_lastCameraPos = game->getPosition();
 }
 
 std::vector<Unit*> Player::GetUnits()
@@ -102,7 +107,20 @@ std::vector<LevelObject*> Player::GetBuildings()
 	return m_buildings;
 }
 
+
+cocos2d::Vec2 Player::GetLastCameraPos()
+{
+	return m_lastCameraPos;
+}
+
 void Player::RemoveUnit(Unit* unit)
 {
 	m_units.erase(std::remove(m_units.begin(), m_units.end(), unit));
+}
+
+void Player::SetStartingCameraPos()
+{
+	int ScreenWidth = cocos2d::Director::getInstance()->getWinSizeInPixels().width;
+	int ScreenHeight = cocos2d::Director::getInstance()->getWinSizeInPixels().height;
+	m_lastCameraPos = -m_base->GetPosition() + cocos2d::Vec2(ScreenWidth / 2, ScreenHeight / 2);
 }

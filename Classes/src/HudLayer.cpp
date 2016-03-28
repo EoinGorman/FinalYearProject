@@ -71,6 +71,7 @@ void HudLayer::CreateBuildMenu()
 	// make buttons
 	for (int i = 0; i < 10; i++)
 	{
+		Unit::Type unitType = Unit::Type(count);
 		auto testButton = ui::Button::create();
 		testButton->setTouchEnabled(true);
 		testButton->setPosition(Vec2(m_scrollView->getPosition().x, m_scrollView->getBottomBoundary() + (i * 100)));
@@ -78,7 +79,46 @@ void HudLayer::CreateBuildMenu()
 		std::string clickedTex = "Hud/UnitNames/UnitNamesClicked" + std::to_string(count) + ".png";
 		testButton->loadTextures(defaultTex, clickedTex);
 
-		testButton->addClickEventListener(CC_CALLBACK_0(HudLayer::BuildUnit, this, Unit::Type(count)));
+		testButton->addClickEventListener(CC_CALLBACK_0(HudLayer::BuildUnit, this, unitType));
+
+		LabelTTF* priceLabel;
+		switch (unitType)
+		{
+		case Unit::Type::soldier:
+			priceLabel = cocos2d::LabelTTF::create("10", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::mortarSquad:
+			priceLabel = cocos2d::LabelTTF::create("15", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::smallTank:
+			priceLabel = cocos2d::LabelTTF::create("25", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::tBoat:
+			priceLabel = cocos2d::LabelTTF::create("20", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::tCopter:
+			priceLabel = cocos2d::LabelTTF::create("25", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::soldier2:
+			priceLabel = cocos2d::LabelTTF::create("15", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::artillery:
+			priceLabel = cocos2d::LabelTTF::create("30", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::largeTank:
+			priceLabel = cocos2d::LabelTTF::create("35", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::attackBoat:
+			priceLabel = cocos2d::LabelTTF::create("30", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		case Unit::Type::attackCopter:
+			priceLabel = cocos2d::LabelTTF::create("35", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
+			break;
+		}
+		testButton->addChild(priceLabel);
+		priceLabel->setPosition(testButton->getSize().width + priceLabel->getContentSize().width/2, (testButton->getSize().height * testButton->getScaleY()) /2);
+		priceLabel->setColor(cocos2d::Color3B(68,67,72));
+
 		m_scrollView->addChild(testButton);
 		m_scrollView->setVisible(false);
 		count--;

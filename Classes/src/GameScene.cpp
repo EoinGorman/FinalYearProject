@@ -63,7 +63,8 @@ bool Game::init()
 
 	for (int i = 0; i < PlayerManager::GetInstance()->GetPlayers().size(); i++)
 	{
-		PlayerManager::GetInstance()->GetPlayers()[i]->EndTurn();
+		PlayerManager::GetInstance()->GetPlayers()[i]->EndTurn(this);
+		PlayerManager::GetInstance()->GetPlayers()[i]->SetStartingCameraPos();
 	}
 	
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
@@ -618,9 +619,13 @@ void Game::SpawnUnit(LevelTile* tile)
 void Game::EndTurn()
 {
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
-	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->EndTurn();
+	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->EndTurn(this);
 	SetNextPlayer();
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
+
+	//Move camera
+	Vec2 lastPos = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetLastCameraPos();
+	this->setPosition(lastPos);
 
 	//Cancel
 	for each (LevelTile* tile in m_selectableTiles)
@@ -672,10 +677,6 @@ void Game::SetNextPlayer()
 	{
 		m_currentPlayerID++;
 	}
-
-	//move camera
-	Vec2 basePos = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetBase()->GetPosition();
-	this->setPosition(-basePos + Vec2(ScreenWidth/2, ScreenHeight/2));
 }
 
 void Game::SetVisibleTiles()

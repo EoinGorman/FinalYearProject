@@ -4,6 +4,7 @@
 
 class Unit;
 class LevelObject;
+class Game;
 
 class Player {
 public:
@@ -27,14 +28,17 @@ public:
 	LevelObject* GetBase();
 	std::vector<LevelObject*> GetBuildings();
 	void RemoveUnit(Unit* unit);
+	cocos2d::Vec2 GetLastCameraPos();
+	void SetStartingCameraPos();
 
 	void StartTurn();
-	void EndTurn();
+	void EndTurn(Game*);
 
 private:
 	int m_ID;
 	int m_turnsTillNextBuild;
 	int m_reinforcementTickets;
+	cocos2d::Vec2 m_lastCameraPos;
 	std::string m_logoSpriteName;
 	cocos2d::Color3B m_colour;
 	Faction m_faction;
