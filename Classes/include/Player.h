@@ -28,6 +28,7 @@ public:
 	LevelObject* GetBase();
 	std::vector<LevelObject*> GetBuildings();
 	void RemoveUnit(Unit* unit);
+	void RemoveBuilding(LevelObject* building);
 	cocos2d::Vec2 GetLastCameraPos();
 	void SetStartingCameraPos();
 

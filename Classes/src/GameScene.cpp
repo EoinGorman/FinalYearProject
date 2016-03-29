@@ -113,11 +113,18 @@ void Game::update(float delta)
 				if (m_path.size() == 1)
 				{
 					m_path[0]->SetOccupyingUnit(m_unitSelected, this);
+					
+					//If nothing in attack range after move...
+					if (GetSelectableTilesForAttacking(m_path[0], m_unitSelected).size() <= 0)
+					{
+						m_unitSelected->SetUsed(true);
+					}
 					m_path.erase(m_path.begin());
 					m_currentStage = Waiting;
 					m_unitSelected->SetMoved(true);
 					m_unitSelected = NULL;
 					SetVisibleTiles();
+
 					break;
 				}
 				m_path.erase(m_path.begin());
@@ -309,7 +316,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					std::cout << "Selectable Tile Clicked: " << tile->GetType();
 
 					//If player has clicked a tile with no other unit on it
-					if (!tile->HasUnit())
+					if (!tile->HasUnit() && !tile->HasObject())
 					{
 						clickCanceled = false;
 						m_levelTileSelected->RemoveOccupyingUnit();
@@ -388,6 +395,24 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 						m_currentStage = Waiting;
 						break;
 					}
+					else if (tile->HasObject())
+					{
+						clickCanceled = false;
+						m_levelTileSelected = tile;
+
+						//ATTACK BUILDING
+						UnitAttack(m_unitSelected, tile->GetOccupyingObject());
+
+						//Reset to waiting
+						for each (LevelTile* tile in m_selectableTiles)
+						{
+							tile->ActivateAltSprite("", false);
+						}
+
+						m_selectableTiles.clear();
+						m_currentStage = Waiting;
+						break;
+					}
 				}
 			}
 
@@ -455,7 +480,7 @@ void Game::onMouseMove(Event *event)
 					{
 						t->SetInPath(false);
 
-						if (!t->HasUnit())
+						if (!t->HasUnit() || !tile->HasObject())
 						{
 							t->ActivateAltSprite("Moving", true);
 						}
@@ -472,7 +497,7 @@ void Game::onMouseMove(Event *event)
 					{
 						t->ActivateAltSprite("", true);
 					}
-					if (tile->HasUnit())
+					if (tile->HasUnit() || tile->HasObject())
 					{
 						tile->ActivateAltSprite("Attacking", true);
 					}
@@ -498,7 +523,7 @@ void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unit
 
 	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
 	{
-		if (Level::GetInstance()->GetGameDistanceBetweenTiles(currentTile, tile) <= distance && !tile->HasUnit())	//If within range and has no unit
+		if (Level::GetInstance()->GetGameDistanceBetweenTiles(currentTile, tile) <= distance && !tile->HasUnit() && !tile->HasObject())	//If within range and has no unit
 		{
 			if (Level::GetInstance()->IsMoveableTile(unitType, tile->GetType()))
 			{
@@ -532,12 +557,14 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 			for (int j = 0; j < neighbourTiles.size(); j++)
 			{
 				bool tileHasFriendlyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() == PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
-				if (!neighbourTiles[j]->GetChecked() && (!neighbourTiles[j]->HasUnit() || tileHasFriendlyUnit))
+				bool tileHasFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() == PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+
+				if (!neighbourTiles[j]->GetChecked() && (!neighbourTiles[j]->HasUnit() || tileHasFriendlyUnit) && (!neighbourTiles[j]->HasObject() ||tileHasFriendlyBuilding))
 				{
 					if (Level::GetInstance()->IsMoveableTile(unit->GetType(), neighbourTiles[j]->GetType()))
 					{
 						neighbourTiles[j]->SetChecked(true);
-						if (!tileHasFriendlyUnit)
+						if (!tileHasFriendlyUnit && !tileHasFriendlyBuilding)
 						{
 							neighbourTiles[j]->ActivateAltSprite("Moving", true);
 						}
@@ -585,7 +612,8 @@ void Game::SetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit)
 					neighbourTiles[j]->SetChecked(true);
 
 					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
-					if (tileHasEnemyUnit)
+					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
 					{
 						neighbourTiles[j]->ActivateAltSprite("Attacking", true);
 						m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
@@ -605,6 +633,55 @@ void Game::SetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit)
 		tile->SetChecked(false);
 	}
 	tilesToReset.clear();
+}
+
+std::vector<LevelTile*> Game::GetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit)
+{
+	//Select all tiles within distance of currentTile
+	int checkCount = 0;
+	int distance = unit->m_attackRange;
+	std::vector<LevelTile*> tilesToCheck;
+	std::vector<LevelTile*> tilesToReset;
+	std::vector<LevelTile*> attackableTiles;
+
+	tilesToCheck.push_back(currentTile);
+	currentTile->SetChecked(true);
+	tilesToReset.push_back(currentTile);
+
+	while (checkCount < distance)
+	{
+		std::vector<LevelTile*> validTiles;
+		for (int i = 0; i < tilesToCheck.size(); i++)
+		{
+			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
+			for (int j = 0; j < neighbourTiles.size(); j++)
+			{
+				if (!neighbourTiles[j]->GetChecked())
+				{
+					neighbourTiles[j]->SetChecked(true);
+
+					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
+					{
+						attackableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+					}
+					validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+					tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
+				}
+			}
+		}
+		tilesToCheck.clear();
+		tilesToCheck = validTiles;
+		checkCount++;
+	}
+
+	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
+	{
+		tile->SetChecked(false);
+	}
+	tilesToReset.clear();
+	return attackableTiles;
 }
 
 void Game::SpawnUnit(LevelTile* tile)
@@ -865,6 +942,33 @@ void Game::UnitAttack(Unit* attackingUnit, Unit* otherUnit)
 			otherUnit->RemoveFromLayer();
 			otherUnit->GetOwner()->RemoveUnit(otherUnit);
 			delete otherUnit;
+		}
+	}
+	attackingUnit->SetUsed(true);
+}
+
+void Game::UnitAttack(Unit* attackingUnit, LevelObject* building)
+{
+	//Calculate attack based off health as well... LATER
+	float attackingPower = attackingUnit->m_attackPower;
+
+	float defence = building->m_defence;
+	defence += m_levelTileSelected->m_defenceBonus;
+
+	if (attackingPower - defence > 0)
+	{
+		building->Alterhealth(-attackingPower);
+		if (building->m_health <= 0)
+		{
+			//Restore health
+			building->SetHealth(10.0f);	
+			
+			//Change Ownership
+			if (building->GetOwner())
+			{
+				building->GetOwner()->RemoveBuilding(building);
+			}
+			building->SetOwner(PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
 		}
 	}
 	attackingUnit->SetUsed(true);

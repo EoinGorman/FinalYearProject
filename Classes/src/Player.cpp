@@ -93,6 +93,7 @@ void Player::AddUnit(Unit* unit)
 void Player::AddBuilding(LevelObject* building)
 {
 	m_buildings.push_back(building);
+	building->SetColour(m_colour);
 
 	if (building->GetType() == LevelObject::HQ && m_base == NULL)
 	{
@@ -164,6 +165,11 @@ cocos2d::Vec2 Player::GetLastCameraPos()
 void Player::RemoveUnit(Unit* unit)
 {
 	m_units.erase(std::remove(m_units.begin(), m_units.end(), unit));
+}
+
+void Player::RemoveBuilding(LevelObject* building)
+{
+	m_buildings.erase(std::remove(m_buildings.begin(), m_buildings.end(), building));
 }
 
 void Player::SetStartingCameraPos()

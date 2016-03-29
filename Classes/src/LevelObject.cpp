@@ -4,6 +4,10 @@
 
 LevelObject::LevelObject()
 {
+	m_healthLabel = cocos2d::LabelTTF::create("10", "fonts/Akashi.ttf", 18, cocos2d::Size(25, 25));
+	m_health = 10.0f;
+	m_defence = 0.0f;
+
 	m_owner = 0;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 
@@ -11,10 +15,17 @@ LevelObject::LevelObject()
 	m_position = cocos2d::Vec2(0,0);
 	m_sprite = cocos2d::Sprite::create("objectsBW.png", cocos2d::Rect((m_type - 1) * ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 	m_sprite->setPosition(m_position);
+
+	m_sprite->addChild(m_healthLabel);
+	m_healthLabel->setPosition(cocos2d::Vec2(ptr->m_tileSize * 0.85f, ptr->m_tileSize * 0.15f));
 }
 
 LevelObject::LevelObject(Type type, cocos2d::Vec2 tile, Player* owner)
 {
+	m_healthLabel = cocos2d::LabelTTF::create("10", "fonts/Akashi.ttf", 18, cocos2d::Size(25, 25));
+	m_health = 10.0f;
+	m_defence = 0.0f;
+
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	m_tile = tile;
 	m_type = type;
@@ -22,6 +33,10 @@ LevelObject::LevelObject(Type type, cocos2d::Vec2 tile, Player* owner)
 	m_sprite = cocos2d::Sprite::create("objectsBW.png", cocos2d::Rect(((int)m_type-1) * ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 	//m_sprite->setContentSize(cocos2d::Size(ptr->m_tileSize, ptr->m_tileSize));	//Not sure what this function does yet, not really needed anyway.. GOOGLE IT LATER ME!!!
 	m_sprite->setPosition(m_position);
+
+	m_sprite->addChild(m_healthLabel);
+	m_healthLabel->setPosition(cocos2d::Vec2(ptr->m_tileSize * 0.85f, ptr->m_tileSize * 0.15f));
+
 	SetOwner(owner);
 }
 
@@ -61,4 +76,16 @@ void LevelObject::SetColour(cocos2d::Color3B newColour)
 cocos2d::Vec2 LevelObject::GetTileIndex()
 {
 	return m_tile;
+}
+
+void LevelObject::SetHealth(float newHealth)
+{
+	m_health = newHealth;
+	m_healthLabel->setString(std::to_string((int)m_health));
+}
+
+void LevelObject::Alterhealth(float value)
+{
+	m_health += value;
+	m_healthLabel->setString(std::to_string((int)m_health));
 }

@@ -47,6 +47,7 @@ public:
 	void SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType);
 	void SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit);
 	void SetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit);
+	std::vector<LevelTile*> GetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit);
 	void SetVisibleTiles();
 	std::vector<LevelTile*> GetAllFOWVisibleTiles();
 	std::vector<LevelTile*> GetAllTilesInSightRange(LevelTile* currentTile, Unit* unit);
@@ -56,6 +57,7 @@ public:
 	void ToggleBuildMenu();
 	void SetUnitTypeSelected(Unit::Type);
 	void UnitAttack(Unit* attackingUnit, Unit* otherUnit);
+	void UnitAttack(Unit* attackingUnit, LevelObject* building);
 	
 
 	void Game::ToggleUnitMenu();

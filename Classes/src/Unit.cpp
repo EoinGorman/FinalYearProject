@@ -212,7 +212,7 @@ void Unit::SetUsed(bool value)
 void Unit::Alterhealth(float value)
 {
 	m_health += value;
-	m_healthLabel->setString(std::to_string(m_health));
+	m_healthLabel->setString(std::to_string((int)m_health));
 }
 
 void Unit::RemoveFromLayer()
