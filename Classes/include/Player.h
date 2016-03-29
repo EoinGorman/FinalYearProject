@@ -34,6 +34,9 @@ public:
 	void StartTurn();
 	void EndTurn(Game*);
 
+	int GetTicketsRemaining();
+	int GetTurnsTillReinforcements();
+
 private:
 	int m_ID;
 	int m_turnsTillNextBuild;

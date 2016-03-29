@@ -6,10 +6,10 @@
 
 Player::Player(int id, Player::Faction faction)
 {
+	m_reinforcementTickets = 40;
 	m_ID = id;
 	m_faction = faction;
-	m_turnsTillNextBuild = 0;
-	m_reinforcementTickets = 100;
+	m_turnsTillNextBuild = 1;
 	m_base = NULL;
 	m_lastCameraPos = cocos2d::Vec2(0, 0);
 
@@ -52,6 +52,42 @@ cocos2d::Color3B Player::GetColour()
 void Player::AddUnit(Unit* unit)
 {
 	m_units.push_back(unit);
+
+	//Subtract reinforcement tickets depending on unit type
+	Unit::Type unitType = unit->GetType();
+	switch (unitType)
+	{
+	case Unit::Type::soldier:
+		m_reinforcementTickets -= 10;
+		break;
+	case Unit::Type::mortarSquad:
+		m_reinforcementTickets -= 15;
+		break;
+	case Unit::Type::smallTank:
+		m_reinforcementTickets -= 25;
+		break;
+	case Unit::Type::tBoat:
+		m_reinforcementTickets -= 20;
+		break;
+	case Unit::Type::tCopter:
+		m_reinforcementTickets -= 25;
+		break;
+	case Unit::Type::soldier2:
+		m_reinforcementTickets -= 15;
+		break;
+	case Unit::Type::artillery:
+		m_reinforcementTickets -= 30;
+		break;
+	case Unit::Type::largeTank:
+		m_reinforcementTickets -= 35;
+		break;
+	case Unit::Type::attackBoat:
+		m_reinforcementTickets -= 30;
+		break;
+	case Unit::Type::attackCopter:
+		m_reinforcementTickets -= 35;
+		break;
+	}
 }
 
 void Player::AddBuilding(LevelObject* building)
@@ -74,6 +110,18 @@ void Player::StartTurn()
 	for (int i = 0; i < m_buildings.size(); i++)
 	{
 		m_buildings[i]->SetColour(m_colour);
+		
+		//for each building owned, add reinforcement tickets
+		m_reinforcementTickets += 10;
+	}
+
+	if (m_turnsTillNextBuild <= 0)
+	{
+		m_turnsTillNextBuild = 5; //TEMP - Calculate based on distance of furthest city
+	}
+	else
+	{
+		m_turnsTillNextBuild--;
 	}
 }
 
@@ -123,4 +171,14 @@ void Player::SetStartingCameraPos()
 	int ScreenWidth = cocos2d::Director::getInstance()->getWinSizeInPixels().width;
 	int ScreenHeight = cocos2d::Director::getInstance()->getWinSizeInPixels().height;
 	m_lastCameraPos = -m_base->GetPosition() + cocos2d::Vec2(ScreenWidth / 2, ScreenHeight / 2);
+}
+
+int Player::GetTicketsRemaining()
+{
+	return m_reinforcementTickets;
+}
+
+int Player::GetTurnsTillReinforcements()
+{
+	return m_turnsTillNextBuild;
 }

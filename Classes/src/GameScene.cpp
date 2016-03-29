@@ -239,9 +239,16 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					{
 						if (tile->GetOccupyingObject()->GetOwner()->GetId() == m_currentPlayerID)
 						{
-							//Select unit to build ---
-							m_levelTileSelected = tile;
-							ToggleBuildMenu();
+							if (PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetTurnsTillReinforcements() <= 0)
+							{
+								//Select unit to build ---
+								m_levelTileSelected = tile;
+								ToggleBuildMenu();
+							}
+							else
+							{
+								//Play failed sound
+							}
 						}
 					}
 				}
@@ -613,6 +620,10 @@ void Game::SpawnUnit(LevelTile* tile)
 	m_currentStage = Waiting;
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
 
+	auto scene = this->getParent();
+	HudLayer* hud = (HudLayer*)scene->getChildByName("HudLayer");
+	hud->UpdateLabels(m_currentPlayerID);
+
 	SetVisibleTiles();
 }
 
@@ -622,6 +633,10 @@ void Game::EndTurn()
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->EndTurn(this);
 	SetNextPlayer();
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
+
+	auto scene = this->getParent();
+	HudLayer* hud = (HudLayer*)scene->getChildByName("HudLayer");
+	hud->UpdateLabels(m_currentPlayerID);
 
 	//Move camera
 	Vec2 lastPos = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetLastCameraPos();
@@ -660,11 +675,55 @@ void Game::ToggleBuildMenu()
 
 void Game::SetUnitTypeSelected(Unit::Type type)
 {
-	ToggleBuildMenu();
-	m_unitTypeSelected = type;
-	SetSelectableTilesForSpawning(m_levelTileSelected, m_unitTypeSelected);
-	m_currentStage = ChoosingSpawn;
-	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/selectBuildingSound.wav", false, 1.0f, 1.0f, 1.0f);
+	int ticketsRemaining = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetTicketsRemaining();
+	int cost = INT32_MAX;
+
+	switch (type)
+	{
+	case Unit::Type::soldier:
+		cost = 10;
+		break;
+	case Unit::Type::mortarSquad:
+		cost = 15;
+		break;
+	case Unit::Type::smallTank:
+		cost = 25;
+		break;
+	case Unit::Type::tBoat:
+		cost = 20;
+		break;
+	case Unit::Type::tCopter:
+		cost = 25;
+		break;
+	case Unit::Type::soldier2:
+		cost = 15;
+		break;
+	case Unit::Type::artillery:
+		cost = 30;
+		break;
+	case Unit::Type::largeTank:
+		cost = 35;
+		break;
+	case Unit::Type::attackBoat:
+		cost = 30;
+		break;
+	case Unit::Type::attackCopter:
+		cost = 35;
+		break;
+	}
+
+	if (ticketsRemaining >= cost)
+	{
+		ToggleBuildMenu();
+		m_unitTypeSelected = type;
+		SetSelectableTilesForSpawning(m_levelTileSelected, m_unitTypeSelected);
+		m_currentStage = ChoosingSpawn;
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/selectBuildingSound.wav", false, 1.0f, 1.0f, 1.0f);
+	}
+	else
+	{
+		//Play failed sound
+	}
 }
 
 void Game::SetNextPlayer()

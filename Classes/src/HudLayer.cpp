@@ -1,6 +1,7 @@
 #include "HudLayer.h"
 #include "GameScene.h"
 #include "PlayerManager.h"
+#include <string>
 
 USING_NS_CC;
 
@@ -82,6 +83,7 @@ void HudLayer::CreateBuildMenu()
 		testButton->addClickEventListener(CC_CALLBACK_0(HudLayer::BuildUnit, this, unitType));
 
 		LabelTTF* priceLabel;
+		LabelTTF* currencyLabel;
 		switch (unitType)
 		{
 		case Unit::Type::soldier:
@@ -115,9 +117,15 @@ void HudLayer::CreateBuildMenu()
 			priceLabel = cocos2d::LabelTTF::create("35", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
 			break;
 		}
+		currencyLabel = cocos2d::LabelTTF::create("$", "fonts/Akashi.ttf", 16, cocos2d::Size(32, 32), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::TOP);
+		testButton->addChild(currencyLabel);
+
 		testButton->addChild(priceLabel);
 		priceLabel->setPosition(testButton->getSize().width + priceLabel->getContentSize().width/2, (testButton->getSize().height * testButton->getScaleY()) /2);
-		priceLabel->setColor(cocos2d::Color3B(68,67,72));
+		priceLabel->setColor(cocos2d::Color3B(68, 67, 72));
+
+		currencyLabel->setPosition(priceLabel->getPositionX(), priceLabel->getPositionY() + (priceLabel->getContentSize().height /3));
+		currencyLabel->setColor(cocos2d::Color3B(68, 67, 72));
 
 		m_scrollView->addChild(testButton);
 		m_scrollView->setVisible(false);
@@ -178,6 +186,14 @@ void HudLayer::CreateHud()
 	m_ticketFrame->setPosition(cocos2d::Point(visibleSize.width / 2,
 		-m_ticketFrame->getContentSize().height / 2 + visibleSize.height + offsetFromCorner.y));	//Set pos to top left corner
 	this->addChild(m_ticketFrame);
+
+	m_reinforcementTicketsLabel = cocos2d::LabelTTF::create("$: 50", "fonts/Akashi.ttf", 32, cocos2d::Size(300, 32), cocos2d::TextHAlignment::LEFT, cocos2d::TextVAlignment::BOTTOM);
+	this->addChild(m_reinforcementTicketsLabel);
+	m_reinforcementTicketsLabel->setPosition(cocos2d::Vec2(175, visibleSize.height - 115));
+
+	m_turnsUntilReinforcementsLabel = cocos2d::LabelTTF::create("0", "fonts/Akashi.ttf", 32, cocos2d::Size(300, 32), cocos2d::TextHAlignment::LEFT, cocos2d::TextVAlignment::BOTTOM);
+	m_turnsUntilReinforcementsLabel->setPosition(cocos2d::Vec2(175, visibleSize.height - 145));
+	this->addChild(m_turnsUntilReinforcementsLabel);
 }
 
 bool HudLayer::init()
@@ -324,4 +340,14 @@ void HudLayer::ToggleUnitMenu(Unit* unit)
 bool HudLayer::IsUnitMenuVisible()
 {
 	return m_unitBackground->isVisible();
+}
+
+void HudLayer::UpdateLabels(int currentPlayer)
+{
+	std::string ticketsRemaining = "$: " + std::to_string(PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTicketsRemaining());
+	std::string turnsRemaining = "" + std::to_string(PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTurnsTillReinforcements());
+	
+
+	m_reinforcementTicketsLabel->setString(ticketsRemaining);
+	m_turnsUntilReinforcementsLabel->setString(turnsRemaining);
 }

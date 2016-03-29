@@ -29,6 +29,7 @@ public:
 	void HudLayer::ToggleUnitMenu(Unit* unit);
 	bool HudLayer::IsUnitMenuVisible();
 
+	void HudLayer::UpdateLabels(int currentPlayer);
 	CREATE_FUNC(HudLayer);
 
 private:
@@ -39,6 +40,9 @@ private:
 	void HudLayer::BuildUnit(Unit::Type);
 	std::vector<cocos2d::Sprite*> m_factionLogos;
 	cocos2d::Sprite* m_ticketFrame;
+
+	cocos2d::LabelTTF* m_reinforcementTicketsLabel; 
+	cocos2d::LabelTTF* m_turnsUntilReinforcementsLabel;
 
 	cocos2d::Sprite* m_pauseBackground;
 	cocos2d::Sprite* m_buildBackground;
