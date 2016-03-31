@@ -51,7 +51,7 @@ public:
 	bool GetUsed();
 	void SetUsed(bool value);
 	float GetHealth();
-	void Alterhealth(float value);
+	void AlterHealth(float value);
 	void RemoveFromLayer();
 
 	float m_health;	//All units have 10 health - displayed as an int in game

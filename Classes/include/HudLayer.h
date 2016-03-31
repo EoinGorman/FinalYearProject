@@ -39,7 +39,6 @@ private:
 	void HudLayer::CreateHud();
 	void HudLayer::BuildUnit(Unit::Type);
 	std::vector<cocos2d::Sprite*> m_factionLogos;
-	cocos2d::Sprite* m_ticketFrame;
 
 	cocos2d::LabelTTF* m_reinforcementTicketsLabel; 
 	cocos2d::LabelTTF* m_turnsUntilReinforcementsLabel;

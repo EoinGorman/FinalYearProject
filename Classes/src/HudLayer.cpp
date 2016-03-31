@@ -182,11 +182,6 @@ void HudLayer::CreateHud()
 	}
 	m_factionLogos[0]->setVisible(true);
 
-	m_ticketFrame = cocos2d::Sprite::create("Hud/ticketHolder.png");
-	m_ticketFrame->setPosition(cocos2d::Point(visibleSize.width / 2,
-		-m_ticketFrame->getContentSize().height / 2 + visibleSize.height + offsetFromCorner.y));	//Set pos to top left corner
-	this->addChild(m_ticketFrame);
-
 	m_reinforcementTicketsLabel = cocos2d::LabelTTF::create("$: 50", "fonts/Akashi.ttf", 32, cocos2d::Size(300, 32), cocos2d::TextHAlignment::LEFT, cocos2d::TextVAlignment::BOTTOM);
 	this->addChild(m_reinforcementTicketsLabel);
 	m_reinforcementTicketsLabel->setPosition(cocos2d::Vec2(175, visibleSize.height - 115));
@@ -346,7 +341,6 @@ void HudLayer::UpdateLabels(int currentPlayer)
 {
 	std::string ticketsRemaining = "$: " + std::to_string(PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTicketsRemaining());
 	std::string turnsRemaining = "" + std::to_string(PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTurnsTillReinforcements());
-	
 
 	m_reinforcementTicketsLabel->setString(ticketsRemaining);
 	m_turnsUntilReinforcementsLabel->setString(turnsRemaining);

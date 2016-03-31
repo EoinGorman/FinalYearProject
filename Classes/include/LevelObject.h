@@ -29,11 +29,13 @@ public:
 	void SetOwner(Player* owner);
 	Player* GetOwner();
 	void SetHealth(float newHealth);
-	void Alterhealth(float value);
+	void AlterHealth(float value);
+	int GetBuildRange();
 	float m_health;	//All buildings have 10 health - displayed as an int in game
 	float m_defence;	//Defence of unit and tile combined
 
 private:
+	int m_buildRange;
 	Player* m_owner;
 	cocos2d::LabelTTF* m_healthLabel;
 	cocos2d::Sprite* m_sprite;

@@ -12,6 +12,7 @@ LevelObject::LevelObject()
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 
 	m_type = Type::City;
+	m_buildRange = 4;
 	m_position = cocos2d::Vec2(0,0);
 	m_sprite = cocos2d::Sprite::create("objectsBW.png", cocos2d::Rect((m_type - 1) * ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 	m_sprite->setPosition(m_position);
@@ -29,6 +30,16 @@ LevelObject::LevelObject(Type type, cocos2d::Vec2 tile, Player* owner)
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	m_tile = tile;
 	m_type = type;
+
+	if (type == Type::HQ)
+	{
+		m_buildRange = 4;
+	}
+	else
+	{
+		m_buildRange = 1;
+	}
+
 	m_position = cocos2d::Vec2(m_tile.x * ptr->m_tileSize, m_tile.y * ptr->m_tileSize);
 	m_sprite = cocos2d::Sprite::create("objectsBW.png", cocos2d::Rect(((int)m_type-1) * ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 	//m_sprite->setContentSize(cocos2d::Size(ptr->m_tileSize, ptr->m_tileSize));	//Not sure what this function does yet, not really needed anyway.. GOOGLE IT LATER ME!!!
@@ -78,14 +89,31 @@ cocos2d::Vec2 LevelObject::GetTileIndex()
 	return m_tile;
 }
 
+int LevelObject::GetBuildRange()
+{
+	return m_buildRange;
+}
+
 void LevelObject::SetHealth(float newHealth)
 {
 	m_health = newHealth;
-	m_healthLabel->setString(std::to_string((int)m_health));
+	int displayedHealth = (int)m_health;
+
+	if (m_health > 0 && m_health < 1)
+	{
+		displayedHealth = 1;
+	}
+	m_healthLabel->setString(std::to_string(displayedHealth));
 }
 
-void LevelObject::Alterhealth(float value)
+void LevelObject::AlterHealth(float value)
 {
 	m_health += value;
-	m_healthLabel->setString(std::to_string((int)m_health));
+	int displayedHealth = (int)m_health;
+
+	if (m_health > 0 && m_health < 1)
+	{
+		displayedHealth = 1;
+	}
+	m_healthLabel->setString(std::to_string(displayedHealth));
 }

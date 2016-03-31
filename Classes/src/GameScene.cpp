@@ -519,7 +519,7 @@ void Game::onMouseMove(Event *event)
 void Game::SetSelectableTilesForSpawning(LevelTile* currentTile, Unit::Type unitType)
 {
 	//Select all tiles within distance of currentTile
-	int distance = 4;
+	int distance = currentTile->GetOccupyingObject()->GetBuildRange();
 
 	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
 	{
@@ -929,20 +929,19 @@ void Game::UnitAttack(Unit* attackingUnit, Unit* otherUnit)
 {
 	//Calculate attack based off health as well... LATER
 	float attackingPower = attackingUnit->m_attackPower;
+	attackingPower *= (attackingUnit->GetHealth() / 10.0f);
 
 	float defence = otherUnit->m_defence;
 	defence += m_levelTileSelected->m_defenceBonus;
+	defence /= 10.0f;
 
-	if (attackingPower - defence > 0)
+	otherUnit->AlterHealth(-(attackingPower - (attackingPower * defence)));
+	if (otherUnit->GetHealth() <= 0)
 	{
-		otherUnit->Alterhealth(-attackingPower);
-		if (otherUnit->GetHealth() <= 0)
-		{
-			m_levelTileSelected->RemoveOccupyingUnit();
-			otherUnit->RemoveFromLayer();
-			otherUnit->GetOwner()->RemoveUnit(otherUnit);
-			delete otherUnit;
-		}
+		m_levelTileSelected->RemoveOccupyingUnit();
+		otherUnit->RemoveFromLayer();
+		otherUnit->GetOwner()->RemoveUnit(otherUnit);
+		delete otherUnit;
 	}
 	attackingUnit->SetUsed(true);
 }
@@ -951,25 +950,25 @@ void Game::UnitAttack(Unit* attackingUnit, LevelObject* building)
 {
 	//Calculate attack based off health as well... LATER
 	float attackingPower = attackingUnit->m_attackPower;
+	attackingPower *= (attackingUnit->GetHealth() / 10.0f);
 
 	float defence = building->m_defence;
 	defence += m_levelTileSelected->m_defenceBonus;
+	defence /= 10.0f;
 
-	if (attackingPower - defence > 0)
+	building->AlterHealth(-(attackingPower - (attackingPower * defence)));
+	if (building->m_health <= 0)
 	{
-		building->Alterhealth(-attackingPower);
-		if (building->m_health <= 0)
+		//Restore health
+		building->SetHealth(10.0f);
+
+		//Change Ownership
+		if (building->GetOwner())
 		{
-			//Restore health
-			building->SetHealth(10.0f);	
-			
-			//Change Ownership
-			if (building->GetOwner())
-			{
-				building->GetOwner()->RemoveBuilding(building);
-			}
-			building->SetOwner(PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
+			building->GetOwner()->RemoveBuilding(building);
 		}
+		building->SetOwner(PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
 	}
+
 	attackingUnit->SetUsed(true);
 }
