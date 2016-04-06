@@ -57,10 +57,12 @@ public:
 	float GetCostToThis();
 	float GetCostToGoal();
 	float GetMovementCost();
+	float GetTerrainCost();
 
 	float m_defenceBonus;
 
 private:
+	float m_terrainCost;
 	cocos2d::Sprite* m_sprite;
 	cocos2d::Sprite* m_altSprite;
 	cocos2d::Vec2 m_position;
@@ -80,4 +82,6 @@ private:
 	float m_totalCost;	//"F" value
 	float m_costToThis;	//"G" value
 	float m_costToGoal;	//"H" value
+
+	void SetStats();
 };

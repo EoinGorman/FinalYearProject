@@ -65,60 +65,96 @@ void Unit::SetUnitStats()
 		m_movementType = foot;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((0)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 3.0f;
+		m_attackRange = 1.0f;
+		m_moveRange = 3.0f;
+		m_defence = 1.0f;
+		m_attackPower = 4.0f;
 		break;
 	case mortarSquad:
 		m_movementType = foot;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((1)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 2.0f;
+		m_attackRange = 2.0f;
+		m_moveRange = 3.0f;
+		m_defence = 1.0f;
+		m_attackPower = 5.5f;
 		break;
 	case smallTank:
 		m_movementType = landVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((2)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 3.0f;
+		m_attackRange = 1.0f;
+		m_moveRange = 4.0f;
+		m_defence = 3.0f;
+		m_attackPower = 7.0f;
 		break;
 	case tBoat:
 		m_movementType = seaVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((3)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 4.0f;
+		m_attackRange = 0.0f;
+		m_moveRange = 5.0f;
+		m_defence = 3.0f;
+		m_attackPower = 0.0f;
 		break;
 	case tCopter:
 		m_movementType = airVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((4)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 5.0f;
+		m_attackRange = 0.0f;
+		m_moveRange = 5.0f;
+		m_defence = 2.0f;
+		m_attackPower = 0.0f;
 		break;
 	case soldier2:
 		m_movementType = foot;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((0)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 3.0f;
+		m_attackRange = 1.0f;
+		m_moveRange = 3.0f;
+		m_defence = 1.5f;
+		m_attackPower = 5.0f;
 		break;
 	case artillery:
 		m_movementType = landVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((1)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 3.0f;
+		m_attackRange = 3.0f;
+		m_moveRange = 3.0f;
+		m_defence = 2.0f;
+		m_attackPower = 8.0f;
 		break;
 	case largeTank:
 		m_movementType = landVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((2)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 3.0f;
+		m_attackRange = 1.0f;
+		m_moveRange = 4.0f;
+		m_defence = 4.0f;
+		m_attackPower = 9.5f;
 		break;
 	case attackBoat:
 		m_movementType = seaVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((3)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 4.0f;
+		m_attackRange = 3.0f;
+		m_moveRange = 4.0f;
+		m_defence = 3.0f;
+		m_attackPower = 8.0f;
 		break;
 	case attackCopter:
 		m_movementType = airVehicle;
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((4)* ptr->m_tileSize, (1) * ptr->m_tileSize, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 5.0f;
+		m_attackRange = 1.0f;
+		m_moveRange = 5.0f;
+		m_defence = 2.0f;
+		m_attackPower = 5.0f;
 		break;
 	}
 
 	m_sprite->addChild(m_healthLabel);
 	m_healthLabel->setPosition(cocos2d::Vec2(ptr->m_tileSize * 0.85f, ptr->m_tileSize * 0.15f));
-	m_defence = 1.0f;
-	m_attackPower = 4.0f;
-	m_attackRange = 1.0f;
-	m_moveRange = 4.0f;
 }
 
 void Unit::AddSpriteToScene(cocos2d::Layer* layer)
@@ -129,6 +165,11 @@ void Unit::AddSpriteToScene(cocos2d::Layer* layer)
 Unit::Type Unit::GetType()
 {
 	return m_type;
+}
+
+Unit::MovementType Unit::GetMovementType()
+{
+	return m_movementType;
 }
 
 cocos2d::Vec2 Unit::GetPosition()

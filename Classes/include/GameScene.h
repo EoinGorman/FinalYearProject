@@ -33,6 +33,7 @@ public:
 
 	// Called when user pauses gameplay.
 	void activatePauseScene(Ref *pSender);
+	void activateInBewtweenTurnsScene(Ref *pSender);
 	void update(float) override;
 	virtual bool onTouchBegan(cocos2d::Touch*, cocos2d::Event*);
 	virtual void onTouchEnded(cocos2d::Touch*, cocos2d::Event*);
@@ -53,6 +54,7 @@ public:
 	std::vector<LevelTile*> GetAllTilesInSightRange(LevelTile* currentTile, Unit* unit);
 	void SpawnUnit(LevelTile* tile);
 	void EndTurn();
+	void StartTurn();
 	void TogglePauseMenu();
 	void ToggleBuildMenu();
 	void SetUnitTypeSelected(Unit::Type);
@@ -72,4 +74,5 @@ private:
 	Unit::Type m_unitTypeSelected;
 	LevelTile* m_levelTileSelected;
 	std::vector<LevelTile*> m_path;
+	void onEnterTransitionDidFinish();
 };

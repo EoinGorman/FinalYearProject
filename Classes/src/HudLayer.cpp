@@ -186,8 +186,9 @@ void HudLayer::CreateHud()
 	this->addChild(m_reinforcementTicketsLabel);
 	m_reinforcementTicketsLabel->setPosition(cocos2d::Vec2(175, visibleSize.height - 115));
 
-	m_turnsUntilReinforcementsLabel = cocos2d::LabelTTF::create("0", "fonts/Akashi.ttf", 32, cocos2d::Size(300, 32), cocos2d::TextHAlignment::LEFT, cocos2d::TextVAlignment::BOTTOM);
+	m_turnsUntilReinforcementsLabel = cocos2d::LabelTTF::create("BUILD NOW", "fonts/Akashi.ttf", 32, cocos2d::Size(300, 32), cocos2d::TextHAlignment::LEFT, cocos2d::TextVAlignment::BOTTOM);
 	m_turnsUntilReinforcementsLabel->setPosition(cocos2d::Vec2(175, visibleSize.height - 145));
+	m_turnsUntilReinforcementsLabel->setColor(cocos2d::Color3B::RED);
 	this->addChild(m_turnsUntilReinforcementsLabel);
 }
 
@@ -340,8 +341,18 @@ bool HudLayer::IsUnitMenuVisible()
 void HudLayer::UpdateLabels(int currentPlayer)
 {
 	std::string ticketsRemaining = "$: " + std::to_string(PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTicketsRemaining());
-	std::string turnsRemaining = "" + std::to_string(PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTurnsTillReinforcements());
+	std::string turnsRemaining = "BUILD IN: " + std::to_string(PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTurnsTillReinforcements());
 
 	m_reinforcementTicketsLabel->setString(ticketsRemaining);
-	m_turnsUntilReinforcementsLabel->setString(turnsRemaining);
+
+	if (PlayerManager::GetInstance()->GetPlayerByID(currentPlayer)->GetTurnsTillReinforcements() == 0)
+	{
+		m_turnsUntilReinforcementsLabel->setString("BUILD NOW");
+		m_turnsUntilReinforcementsLabel->setColor(cocos2d::Color3B::RED);
+	}
+	else
+	{
+		m_turnsUntilReinforcementsLabel->setString(turnsRemaining);
+		m_turnsUntilReinforcementsLabel->setColor(cocos2d::Color3B::WHITE);
+	}
 }

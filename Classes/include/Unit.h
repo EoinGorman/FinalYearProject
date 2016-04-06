@@ -37,6 +37,7 @@ public:
 
 	void AddSpriteToScene(cocos2d::Layer* layer);
 	Type GetType();
+	MovementType GetMovementType();
 	cocos2d::Vec2 GetPosition();
 	void SetUnitStats();
 	void SetColour(cocos2d::Color3B newColour);

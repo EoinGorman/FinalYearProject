@@ -60,6 +60,9 @@
     <ClCompile Include="..\Classes\src\PlayerManager.cpp">
       <Filter>src\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\src\InBetweenTurnsScene.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -102,6 +105,9 @@
       <Filter>src\include</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\include\PlayerManager.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\InBetweenTurnsScene.h">
       <Filter>src\include</Filter>
     </ClInclude>
   </ItemGroup>

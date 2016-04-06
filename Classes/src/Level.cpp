@@ -301,6 +301,12 @@ std::vector<LevelTile*> Level::GetPath(LevelTile* start, LevelTile* goal, std::l
 				}
 				if (openList.size() == 0)
 				{
+					//Reset All Tile Values
+					start->ResetSearchVariables();
+					for each (LevelTile* tile in availableTiles)
+					{
+						tile->ResetSearchVariables();
+					}
 					return std::vector<LevelTile*>();
 				}
 			}

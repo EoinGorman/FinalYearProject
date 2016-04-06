@@ -9,10 +9,11 @@ LevelTile::LevelTile()
 	m_object = NULL;
 	m_hasUnit = false;
 	m_unit = NULL;
-	m_movementCost = 50;
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 
 	m_type = Type::Grass;
+	SetStats();
+	m_movementCost = 50 * m_terrainCost;
 	m_position = cocos2d::Vec2(0,0);
 	m_sprite = cocos2d::Sprite::create("tiles.png", cocos2d::Rect(m_type * ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 	m_sprite->setPosition(m_position);
@@ -27,16 +28,14 @@ LevelTile::LevelTile(Type type, cocos2d::Vec2 position, cocos2d::Vec2 index)
 	m_object = NULL;
 	m_hasUnit = false;
 	m_unit = NULL;
-	m_movementCost = 50;
 
 	std::shared_ptr<GameData> ptr = GameData::sharedGameData();
 	m_type = type;
+	SetStats();
+	m_movementCost = 50 * m_terrainCost;
 	m_position = position;
 	m_index = index;
 	int xOffset = m_type * ptr->m_tileSize;
-
-	//m_terrainTexture = cocos2d::Sprite::create("tiles.png", cocos2d::Rect(xOffset, 0, ptr->m_tileSize, ptr->m_tileSize))->getTexture();
-	//m_altTexture = cocos2d::Sprite::create("altTile.png")->getTexture();
 
 	m_sprite = cocos2d::Sprite::create("tiles.png", cocos2d::Rect(xOffset, 0, ptr->m_tileSize, ptr->m_tileSize));
 	m_sprite->setContentSize(cocos2d::Size(ptr->m_tileSize, ptr->m_tileSize));	//Not sure what this function does yet, not really needed anyway.. GOOGLE IT LATER ME!!!
@@ -45,8 +44,6 @@ LevelTile::LevelTile(Type type, cocos2d::Vec2 position, cocos2d::Vec2 index)
 	m_altSprite = cocos2d::Sprite::create("altTile.png");
 	m_altSprite->setPosition(m_position);
 	m_altSprite->setContentSize(cocos2d::Size(ptr->m_tileSize, ptr->m_tileSize));
-
-	m_defenceBonus = 1.0f;
 }
 
 
@@ -254,4 +251,48 @@ float LevelTile::GetCostToGoal()
 float LevelTile::GetMovementCost()
 {
 	return m_movementCost;
+}
+
+void LevelTile::SetStats()
+{
+	switch (m_type)
+	{
+	case Road:
+		m_terrainCost = 1.0f;
+		m_defenceBonus = 1.0f;
+		break;
+	case River:
+		m_terrainCost = 1.5f;
+		m_defenceBonus = 1.5f;
+		break;
+	case Mountain:
+		m_terrainCost = 2.5f;
+		m_defenceBonus = 3.0f;
+		break;
+	case Beach:
+		m_terrainCost = 1.5f;
+		m_defenceBonus = 1.0f;
+		break;
+	case Forest:
+		m_terrainCost = 2;
+		m_defenceBonus = 2.0f;
+		break;
+	case Jungle:
+		m_terrainCost = 2.5f;
+		m_defenceBonus = 2.5f;
+		break;
+	case Grass:
+		m_terrainCost = 1.25f;
+		m_defenceBonus = 1.0f;
+		break;
+	case Sea:
+		m_terrainCost = 1.0f;
+		m_defenceBonus = 1.0f;
+		break;
+	}
+}
+
+float LevelTile::GetTerrainCost()
+{
+	return m_terrainCost;
 }

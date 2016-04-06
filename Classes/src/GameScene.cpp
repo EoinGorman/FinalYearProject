@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "PlayerManager.h"
+#include "InBetweenTurnsScene.h"
 #include <iostream>
 
 #define CameraSpeed 350
@@ -79,6 +80,12 @@ void Game::activatePauseScene(Ref *pSender)
 {
 	auto scene = Pause::createScene();
 	Director::getInstance()->pushScene(scene);
+}
+
+void Game::activateInBewtweenTurnsScene(Ref *pSender)
+{
+	auto scene = InBetweenTurnsScene::createScene(Director::getInstance()->getRunningScene());
+	Director::getInstance()->pushScene(TransitionTurnOffTiles::create(0.5f, scene));
 }
 
 void Game::update(float delta)
@@ -476,17 +483,18 @@ void Game::onMouseMove(Event *event)
 					rect.size.height);
 				if (rect.containsPoint(mousePos) && !tile->GetInPath())
 				{
-					for each (LevelTile* t in m_path)
+					//Reset tiles in last path
+					for each (LevelTile* t in m_selectableTiles)
 					{
 						t->SetInPath(false);
 
-						if (!t->HasUnit() || !tile->HasObject())
-						{
-							t->ActivateAltSprite("Moving", true);
-						}
-						else
+						if (t->HasUnit() || t->HasObject())	//If tile is occupied remove all tint 
 						{
 							t->ActivateAltSprite("", false);
+						}
+						else	//otherwise, set blue "selectable" tint
+						{
+							t->ActivateAltSprite("Moving", true);
 						}
 					}
 
@@ -538,7 +546,7 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 {
 	//Select all tiles within distance of currentTile
 	int checkCount = 0;
-	int distance = unit->m_moveRange;
+	float distance = unit->m_moveRange;
 	std::vector<LevelTile*> tilesToCheck;
 	std::vector<LevelTile*> tilesToReset;
 
@@ -580,10 +588,40 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 		checkCount++;
 	}
 
+	std::vector<LevelTile*> tilesToRemove;
+	if (unit->GetMovementType() != Unit::airVehicle)
+	{
+		for (int i = 0; i < tilesToReset.size(); i++)
+		{
+			if (tilesToReset[i] != currentTile)
+			{
+				float totalCost = 0;
+				std::vector<LevelTile*> path = Level::GetInstance()->GetPath(currentTile, tilesToReset[i], m_selectableTiles);
+
+				for (int j = 1; j < path.size(); j++)	//start checking at index 1 so as not to check the tile the unit is on
+				{
+					totalCost += path[j]->GetTerrainCost();
+				}
+
+				if (totalCost > distance)
+				{
+					tilesToRemove.push_back(tilesToReset[i]);
+				}
+			}
+		}
+	}
+
+	for each (LevelTile* tile in tilesToRemove)
+	{
+		tile->ActivateAltSprite("", false);
+		m_selectableTiles.erase(std::remove(m_selectableTiles.begin(), m_selectableTiles.end(), tile));
+	}
+
 	for each (LevelTile* tile in Level::GetInstance()->GetTiles())
 	{
 		tile->SetChecked(false);
 	}
+
 	tilesToReset.clear();
 }
 
@@ -610,9 +648,28 @@ void Game::SetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit)
 				if (!neighbourTiles[j]->GetChecked())
 				{
 					neighbourTiles[j]->SetChecked(true);
-
+					
+					//Check if tile has an enemy unit, and if it does make sure it is attackable
 					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					if (tileHasEnemyUnit)
+					{
+						tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
+					}
+
+					//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
 					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					if (tileHasNonFriendlyBuilding)
+					{
+						if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
+						{
+								tileHasNonFriendlyBuilding = true;
+						}
+						else
+						{
+							tileHasNonFriendlyBuilding = false;
+						}
+					}
+
 					if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
 					{
 						neighbourTiles[j]->ActivateAltSprite("Attacking", true);
@@ -659,9 +716,27 @@ std::vector<LevelTile*> Game::GetSelectableTilesForAttacking(LevelTile* currentT
 				if (!neighbourTiles[j]->GetChecked())
 				{
 					neighbourTiles[j]->SetChecked(true);
-
+					//Check if tile has an enemy unit, and if it does make sure it is attackable
 					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					if (tileHasEnemyUnit)
+					{
+						tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
+					}
+
+					//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
 					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					if (tileHasNonFriendlyBuilding)
+					{
+						if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
+						{
+								tileHasNonFriendlyBuilding = true;
+						}
+						else
+						{
+							tileHasNonFriendlyBuilding = false;
+						}
+					}
+
 					if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
 					{
 						attackableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
@@ -709,6 +784,11 @@ void Game::EndTurn()
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->EndTurn(this);
 	SetNextPlayer();
+	activateInBewtweenTurnsScene(this);
+}
+
+void Game::StartTurn()
+{
 	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
 
 	auto scene = this->getParent();
@@ -971,4 +1051,9 @@ void Game::UnitAttack(Unit* attackingUnit, LevelObject* building)
 	}
 
 	attackingUnit->SetUsed(true);
+}
+
+void Game::onEnterTransitionDidFinish()
+{
+	m_levelTileSelected = NULL;
 }
