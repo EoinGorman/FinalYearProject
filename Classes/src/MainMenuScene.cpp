@@ -68,8 +68,8 @@ bool MainMenu::init()
 
 void MainMenu::activateGameScene(Ref *pSender)
 {
-	auto scene = Game::createScene(); 
-	Director::getInstance()->replaceScene(scene);
+	auto scene = LevelSelectScene::createScene(); 
+	Director::getInstance()->replaceScene(TransitionFadeBL::create(1.0f, scene));
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
 

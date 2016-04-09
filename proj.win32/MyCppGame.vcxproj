@@ -148,6 +148,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y</Command>
     <ClCompile Include="..\Classes\src\Level.cpp" />
     <ClCompile Include="..\Classes\src\LevelLoader.cpp" />
     <ClCompile Include="..\Classes\src\LevelObject.cpp" />
+    <ClCompile Include="..\Classes\src\LevelSelectScene.cpp" />
     <ClCompile Include="..\Classes\src\LevelTile.cpp" />
     <ClCompile Include="..\Classes\src\MainMenuScene.cpp" />
     <ClCompile Include="..\Classes\src\PauseScene.cpp" />
@@ -165,6 +166,7 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)" /D /E /I /F /Y</Command>
     <ClInclude Include="..\Classes\include\Level.h" />
     <ClInclude Include="..\Classes\include\LevelLoader.h" />
     <ClInclude Include="..\Classes\include\LevelObject.h" />
+    <ClInclude Include="..\Classes\include\LevelSelectScene.h" />
     <ClInclude Include="..\Classes\include\Leveltile.h" />
     <ClInclude Include="..\Classes\include\MainMenuScene.h" />
     <ClInclude Include="..\Classes\include\PauseScene.h" />

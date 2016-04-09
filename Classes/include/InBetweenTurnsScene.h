@@ -15,6 +15,7 @@ public:
 
 	CREATE_FUNC(InBetweenTurnsScene);
 private:
+	cocos2d::Sprite* m_nextTeamLogo;
 	cocos2d::LabelTTF* m_label;
 	void onEnterTransitionDidFinish();
 };

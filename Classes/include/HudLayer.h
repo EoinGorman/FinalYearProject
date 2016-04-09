@@ -30,6 +30,8 @@ public:
 	bool HudLayer::IsUnitMenuVisible();
 
 	void HudLayer::UpdateLabels(int currentPlayer);
+
+	cocos2d::Sprite* HudLayer::GetLogo(int currentPlayer);
 	CREATE_FUNC(HudLayer);
 
 private:

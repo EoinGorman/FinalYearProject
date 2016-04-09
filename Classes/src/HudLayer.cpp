@@ -356,3 +356,8 @@ void HudLayer::UpdateLabels(int currentPlayer)
 		m_turnsUntilReinforcementsLabel->setColor(cocos2d::Color3B::WHITE);
 	}
 }
+
+cocos2d::Sprite* HudLayer::GetLogo(int currentPlayer)
+{
+	return m_factionLogos[currentPlayer];
+}

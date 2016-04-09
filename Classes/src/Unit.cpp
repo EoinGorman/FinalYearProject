@@ -66,7 +66,7 @@ void Unit::SetUnitStats()
 		m_sprite = cocos2d::Sprite::create("unitsBW.png", cocos2d::Rect((0)* ptr->m_tileSize, 0, ptr->m_tileSize, ptr->m_tileSize));
 		m_sightRange = 3.0f;
 		m_attackRange = 1.0f;
-		m_moveRange = 3.0f;
+		m_moveRange = 4.0f;
 		m_defence = 1.0f;
 		m_attackPower = 4.0f;
 		break;
