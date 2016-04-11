@@ -38,6 +38,7 @@ private:
 	void LevelSelectScene::ToggleConfirmPopUp(Ref *pSender);
 	void LevelSelectScene::LevelConfirmed(Ref *pSender);
 
+	int m_levelNumber;
 	cocos2d::Menu* m_levelItem;
 	cocos2d::Menu* LevelSelectScene::CreateLevelItem(int index);
 

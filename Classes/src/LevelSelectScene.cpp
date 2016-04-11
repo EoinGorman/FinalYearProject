@@ -97,7 +97,12 @@ void LevelSelectScene::backToMain(Ref *pSender)
 
 void LevelSelectScene::levelChosen(Ref *pSender)
 {
+	std::string levelName = "Level" + std::to_string(m_levelNumber);
+	Level::GetInstance()->SetLevelToLoad(levelName);
 
+	auto scene = Game::createScene();
+	Director::getInstance()->replaceScene(TransitionFadeBL::create(1.0f, scene));
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
 
 //Private Functions
@@ -151,6 +156,7 @@ void LevelSelectScene::LevelConfirmed(Ref* pSender)
 
 cocos2d::Menu* LevelSelectScene::CreateLevelItem(int index)
 {
+	m_levelNumber = index;
 	auto* label = cocos2d::LabelTTF::create(m_levelNames[index], "fonts/Akashi.ttf", 32, cocos2d::Size(250, 64), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::TOP);
 	auto levelname = MenuItemLabel::create(label);
 	levelname->setDisabledColor(cocos2d::Color3B(68, 67, 72));
