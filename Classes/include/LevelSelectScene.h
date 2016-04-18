@@ -25,10 +25,13 @@ private:
 	std::vector<std::string> m_levelPreviewClickedPaths;
 	std::vector<std::string> m_levelNames;
 	std::vector<std::string> m_levelDescriptions;
+	std::vector<int> m_levelPlayerCount;
+	
 
 	void LevelSelectScene::SetLevelPreviewPaths();
 	void LevelSelectScene::SetLevelNames();
 	void LevelSelectScene::SetLevelDescriptions();
+	void LevelSelectScene::SetLevelPlayerCount();
 
 	void LevelSelectScene::LeftArrowClicked();
 	void LevelSelectScene::RightArrowClicked();
@@ -38,6 +41,8 @@ private:
 	void LevelSelectScene::ToggleConfirmPopUp(Ref *pSender);
 	void LevelSelectScene::LevelConfirmed(Ref *pSender);
 
+	bool m_arrowClicked;
+	int m_itemMoveDirection;	//Either be 1 or -1 and just multiply this in the moving equation
 	int m_levelNumber;
 	cocos2d::Menu* m_levelItem;
 	cocos2d::Menu* LevelSelectScene::CreateLevelItem(int index);

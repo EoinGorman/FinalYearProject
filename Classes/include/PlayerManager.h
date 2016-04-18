@@ -13,9 +13,12 @@ public:
 	void ResetPlayerManager();
 	void SetNumberOfPlayers(int num);
 	void AddPlayer(Player::Faction);
+	Player* GetCurrentPlayer();
+	void CycleToNextPlayer();
 	int GetPlayerCount();
 	Player* GetPlayerByID(int id);
 	std::vector<Player*> GetPlayers();
+	void DeleteMarkedPlayers();
 
 private:
 	int m_redFactionCount;
@@ -24,6 +27,7 @@ private:
 	int m_yellowFactionCount;
 
 	int m_playerCount;
+	int m_currentPlayerIndex;
 	std::vector<Player*> m_players;
 
 	//Functions
@@ -31,6 +35,7 @@ private:
 	{
 		//private constructor
 		m_playerCount = 0;
+		m_currentPlayerIndex = 0;
 
 		m_redFactionCount = 0;
 		m_blueFactionCount = 0;

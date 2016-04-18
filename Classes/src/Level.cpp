@@ -42,8 +42,10 @@ void Level::Load(cocos2d::Layer* layer)
 	loader.LoadLevel(m_levelToLoadName);
 
 	//2.	SELECT CHARACTERS AND THEN...
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::yellow);
-	PlayerManager::GetInstance()->AddPlayer(Player::Faction::green);
+	for (int i = 0; i < m_factionsChosen.size(); i++)
+	{
+		PlayerManager::GetInstance()->AddPlayer(m_factionsChosen[i]);
+	}
 
 	//3.	LOAD ACTUAL LEVEL
 	cocos2d::Size visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
@@ -142,12 +144,12 @@ bool Level::IsMoveableTile(Unit::Type unitType, LevelTile::Type tyleType)
 			return false;
 		else
 			return true;
-	case Unit::Type::tBoat:
+	case Unit::Type::scoutBoat:
 		if (tyleType == LevelTile::Type::Grass || tyleType == LevelTile::Type::Road || tyleType == LevelTile::Type::Mountain || tyleType == LevelTile::Type::Forest || tyleType == LevelTile::Type::Jungle)
 			return false;
 		else
 			return true;
-	case Unit::Type::tCopter:
+	case Unit::Type::scoutCopter:
 		return true;
 	case Unit::Type::soldier2:
 		if (tyleType == LevelTile::Type::Sea)
@@ -190,9 +192,9 @@ bool Level::IsAttackableUnit(Unit::Type unitType, Unit::MovementType otherUnitTy
 			return true;
 	case Unit::Type::smallTank:
 		return true;
-	case Unit::Type::tBoat:
+	case Unit::Type::scoutBoat:
 		return false;
-	case Unit::Type::tCopter:
+	case Unit::Type::scoutCopter:
 		return false;
 	case Unit::Type::soldier2:
 		if (otherUnitType == Unit::MovementType::airVehicle || otherUnitType == Unit::MovementType::seaVehicle)
@@ -216,6 +218,11 @@ bool Level::IsAttackableUnit(Unit::Type unitType, Unit::MovementType otherUnitTy
 void Level::SetLevelToLoad(std::string levelName)
 {
 	m_levelToLoadName = levelName;
+}
+
+void Level::SetFactionsChosen(std::vector<Player::Faction> factions)
+{
+	m_factionsChosen = factions;
 }
 
 LevelTile* Level::GetTileAtIndex(cocos2d::Vec2 index)
@@ -360,4 +367,14 @@ float Level::GetDistanceSoFar(LevelTile* current)
 		distance += GetDistanceSoFar(current->GetParent());
 	}
 	return distance;
+}
+
+void Level::SetNumberOfHQs(int amount)
+{
+	m_numberOfHQs = amount;
+}
+
+int Level::GetNumberOfHQs()
+{
+	return m_numberOfHQs;
 }

@@ -5,6 +5,7 @@
 #include <stdlib.h> 
 #include "Leveltile.h"
 #include "LevelLoader.h"
+#include "Player.h"
 
 //Will be a singleton, reload level to play a different one
 class Level
@@ -31,6 +32,9 @@ public:
 	bool IsMoveableTile(Unit::Type unitType, LevelTile::Type tyleType);
 	bool IsAttackableUnit(Unit::Type unitType, Unit::MovementType otherUnitType);
 	void SetLevelToLoad(std::string levelName);
+	void SetFactionsChosen(std::vector<Player::Faction>);
+	void SetNumberOfHQs(int amount);
+	int GetNumberOfHQs();
 	std::vector<LevelTile*> GetNeighbourTiles(LevelTile*);
 	LevelTile* GetTileAtIndex(cocos2d::Vec2 index);
 
@@ -40,7 +44,9 @@ private:
 	static bool instanceFlag;
 	static Level *instance;
 
+	int m_numberOfHQs;
 	std::string m_levelToLoadName;
+	std::vector<Player::Faction> m_factionsChosen;
 	std::vector<LevelTile*> m_levelTerrain;
 	std::vector<LevelObject*> m_levelObjects;
 	cocos2d::Sprite* m_background;

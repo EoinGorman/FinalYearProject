@@ -66,6 +66,12 @@
     <ClCompile Include="..\Classes\src\LevelSelectScene.cpp">
       <Filter>src\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\src\CharacterSelectScene.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\src\GameOverScene.cpp">
+      <Filter>src\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -114,6 +120,12 @@
       <Filter>src\include</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\include\LevelSelectScene.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\CharacterSelectScene.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\include\GameOverScene.h">
       <Filter>src\include</Filter>
     </ClInclude>
   </ItemGroup>

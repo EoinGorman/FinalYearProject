@@ -1,6 +1,10 @@
 #include "LevelSelectScene.h"
+#include "CharacterSelectScene.h"
 
 USING_NS_CC;
+
+#define ScrollSpeed 750.0f
+#define FadeOutSpeed 450.0f
 
 Scene* LevelSelectScene::createScene()
 {
@@ -20,6 +24,8 @@ bool LevelSelectScene::init()
 		return false;
 	}
 
+	m_arrowClicked = false;
+
 	//Set up Key Listeners
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = CC_CALLBACK_2(LevelSelectScene::onKeyPressed, this);
@@ -33,6 +39,7 @@ bool LevelSelectScene::init()
 	SetLevelPreviewPaths();
 	SetLevelNames();
 	SetLevelDescriptions();
+	SetLevelPlayerCount();
 
 	m_levelItem = CreateLevelItem(0);
 
@@ -40,6 +47,21 @@ bool LevelSelectScene::init()
 	sceneTitle->setColor(cocos2d::Color3B(68, 67, 72));
 	sceneTitle->setPositionX(visibleSize.width / 2);
 	sceneTitle->setPositionY(visibleSize.height - sceneTitle->getBoundingBox().size.height / 2);
+
+	//Add arrow buttons
+	auto rightArrow =
+		MenuItemImage::create("Hud/rightArrowDefault.png",
+		"Hud/rightArrowCLicked.png",
+		CC_CALLBACK_0(LevelSelectScene::RightArrowClicked, this));
+
+
+	auto leftArrow =
+		MenuItemImage::create("Hud/leftArrowDefault.png",
+		"Hud/leftArrowCLicked.png",
+		CC_CALLBACK_0(LevelSelectScene::LeftArrowClicked, this));
+
+	auto arrowButtons = Menu::create(leftArrow, rightArrow, NULL);
+	arrowButtons->alignItemsHorizontallyWithPadding(m_levelItem->getBoundingBox().size.width/2);
 
 	//Add Background
 	auto backgroundSprite = cocos2d::Sprite::create("Hud/blankBackground.png");
@@ -49,13 +71,17 @@ bool LevelSelectScene::init()
 	backgroundSprite->setScaleX(visibleSize.width / backgroundSprite->getContentSize().width);
 	backgroundSprite->setScaleY(visibleSize.height / backgroundSprite->getContentSize().height);
 
-	this->addChild(backgroundSprite);
-	this->addChild(sceneTitle);
+	this->addChild(backgroundSprite, 0);
+	this->addChild(sceneTitle, 0);
 
-	this->addChild(m_levelItem);
+	this->addChild(m_levelItem, 0);
+
+	this->addChild(arrowButtons, 1);
 
 	CreateConfirmationPopUp();
-	 
+
+	this->scheduleUpdate();
+
 	return true;
 }
 
@@ -71,7 +97,36 @@ void LevelSelectScene::resume(Ref *pSender)
 
 void LevelSelectScene::update(float delta)
 {
+	if (m_arrowClicked)
+	{
+		//check if offscreen
+		if (m_levelItem->getOpacity() - (FadeOutSpeed * delta) <= 0)
+		{
+			m_arrowClicked = false;
 
+			m_levelNumber += m_itemMoveDirection;
+			if (m_levelNumber < 0)
+			{
+				m_levelNumber = m_levelNames.size() - 1;
+			}
+			else if (m_levelNumber >= m_levelNames.size())
+			{
+				m_levelNumber = 0;
+			}
+
+			this->removeChild(m_levelItem);
+
+			m_levelItem = CreateLevelItem(m_levelNumber);
+
+			this->addChild(m_levelItem, 0);
+		}
+		else
+		{
+			//move levelItem
+			m_levelItem->setPositionX(m_levelItem->getPosition().x + ((ScrollSpeed * delta) * m_itemMoveDirection));
+			m_levelItem->setOpacity(m_levelItem->getOpacity() - (FadeOutSpeed * delta));
+		}
+	}
 }
 
 void LevelSelectScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
@@ -97,10 +152,13 @@ void LevelSelectScene::backToMain(Ref *pSender)
 
 void LevelSelectScene::levelChosen(Ref *pSender)
 {
+	//Sets level to be loaded
 	std::string levelName = "Level" + std::to_string(m_levelNumber);
 	Level::GetInstance()->SetLevelToLoad(levelName);
+	Level::GetInstance()->SetNumberOfHQs(m_levelPlayerCount[m_levelNumber]);
 
-	auto scene = Game::createScene();
+	//Moves to Character Select Scene
+	auto scene = CharacterSelectScene::createScene();
 	Director::getInstance()->replaceScene(TransitionFadeBL::create(1.0f, scene));
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
@@ -108,18 +166,37 @@ void LevelSelectScene::levelChosen(Ref *pSender)
 //Private Functions
 void LevelSelectScene::LeftArrowClicked()
 {
-
+	if (!m_arrowClicked)
+	{
+		m_arrowClicked = true;
+		m_itemMoveDirection = -1;
+	}
+	else
+	{
+		//play negative sound effect
+	}
 }
 
 void LevelSelectScene::RightArrowClicked()
 {
-
+	if (!m_arrowClicked)
+	{
+		m_arrowClicked = true;
+		m_itemMoveDirection = 1;
+	}
+	else
+	{
+		//play negative sound effect
+	}
 }
 
 void LevelSelectScene::ToggleConfirmPopUp(Ref *pSender)
 {
-	m_levelItem->setEnabled(m_confirmationPopUp->isVisible());
-	m_confirmationPopUp->setVisible(!m_confirmationPopUp->isVisible());
+	if (!m_arrowClicked)
+	{
+		m_levelItem->setEnabled(m_confirmationPopUp->isVisible());
+		m_confirmationPopUp->setVisible(!m_confirmationPopUp->isVisible());
+	}
 }
 
 void LevelSelectScene::CreateConfirmationPopUp()
@@ -146,7 +223,7 @@ void LevelSelectScene::CreateConfirmationPopUp()
 
 	m_confirmationPopUp->addChild(menu);
 
-	this->addChild(m_confirmationPopUp);
+	this->addChild(m_confirmationPopUp, 1);
 }
 
 void LevelSelectScene::LevelConfirmed(Ref* pSender)
@@ -169,7 +246,7 @@ cocos2d::Menu* LevelSelectScene::CreateLevelItem(int index)
 
 	auto levelPreview =
 		MenuItemImage::create(m_levelPreviewPaths[index],
-		m_levelPreviewClickedPaths[0],
+		m_levelPreviewClickedPaths[index],
 		CC_CALLBACK_1(LevelSelectScene::ToggleConfirmPopUp, this));
 
 	auto levelitem = Menu::create(levelPreview, levelname, levelDescription, NULL);
@@ -190,6 +267,12 @@ void LevelSelectScene::SetLevelPreviewPaths()
 	
 	m_levelPreviewPaths.push_back("LevelPreviews/LevelPreview0.png");
 	m_levelPreviewClickedPaths.push_back("LevelPreviews/LevelPreviewClicked0.png");
+
+	m_levelPreviewPaths.push_back("LevelPreviews/LevelPreview1.png");
+	m_levelPreviewClickedPaths.push_back("LevelPreviews/LevelPreviewClicked1.png");
+
+	m_levelPreviewPaths.push_back("LevelPreviews/LevelPreview2.png");
+	m_levelPreviewClickedPaths.push_back("LevelPreviews/LevelPreviewClicked2.png");
 	//....
 	//....
 	//....
@@ -200,7 +283,11 @@ void LevelSelectScene::SetLevelNames()
 {
 	m_levelNames = std::vector<std::string>();
 
-	m_levelNames.push_back("Test Level");
+	m_levelNames.push_back("Bare Bones");
+
+	m_levelNames.push_back("Triple Threat");
+
+	m_levelNames.push_back("Fever Pitch");
 	//....
 	//....
 	//....
@@ -212,6 +299,25 @@ void LevelSelectScene::SetLevelDescriptions()
 	m_levelDescriptions = std::vector<std::string>();
 
 	m_levelDescriptions.push_back("- Two Player Map.\n- Size = Small.\n");
+
+	m_levelDescriptions.push_back("- Three Player Map.\n- Size = Large.\n");
+
+	m_levelDescriptions.push_back("- Two Player Map.\n- Size = Large.\n");
+	//....
+	//....
+	//....
+	//etc.
+}
+
+void LevelSelectScene::SetLevelPlayerCount()
+{
+	m_levelPlayerCount = std::vector<int>();
+
+	m_levelPlayerCount.push_back(2);
+
+	m_levelPlayerCount.push_back(3);
+
+	m_levelPlayerCount.push_back(2);
 	//....
 	//....
 	//....

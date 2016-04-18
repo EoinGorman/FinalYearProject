@@ -33,6 +33,7 @@ public:
 
 	// Called when user pauses gameplay.
 	void activatePauseScene(Ref *pSender);
+	void activateGameOverScene(Ref *pSender);
 	void activateInBewtweenTurnsScene(Ref *pSender);
 	void update(float) override;
 	virtual bool onTouchBegan(cocos2d::Touch*, cocos2d::Event*);

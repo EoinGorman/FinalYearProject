@@ -20,8 +20,8 @@ public:
 		soldier = 0,
 		mortarSquad = 1,
 		smallTank = 2,
-		tBoat = 3,
-		tCopter = 4,
+		scoutBoat = 3,
+		scoutCopter = 4,
 
 		soldier2 = 5,
 		artillery = 6,

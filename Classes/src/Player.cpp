@@ -3,9 +3,11 @@
 #include "LevelObject.h"
 #include "cocos2d.h"
 #include "GameScene.h"
+#include "PlayerManager.h"
 
 Player::Player(int id, Player::Faction faction)
 {
+	m_markedForDeletion = false;
 	m_reinforcementTickets = 40;
 	m_ID = id;
 	m_faction = faction;
@@ -66,10 +68,10 @@ void Player::AddUnit(Unit* unit)
 	case Unit::Type::smallTank:
 		m_reinforcementTickets -= 25;
 		break;
-	case Unit::Type::tBoat:
+	case Unit::Type::scoutBoat:
 		m_reinforcementTickets -= 20;
 		break;
-	case Unit::Type::tCopter:
+	case Unit::Type::scoutCopter:
 		m_reinforcementTickets -= 25;
 		break;
 	case Unit::Type::soldier2:
@@ -169,7 +171,37 @@ void Player::RemoveUnit(Unit* unit)
 
 void Player::RemoveBuilding(LevelObject* building)
 {
-	m_buildings.erase(std::remove(m_buildings.begin(), m_buildings.end(), building));
+	if (building == m_base)
+	{
+		RemovePlayerFromGame();
+	}
+	else
+	{
+		m_buildings.erase(std::remove(m_buildings.begin(), m_buildings.end(), building));
+	}
+}
+
+void Player::RemovePlayerFromGame()
+{
+	m_markedForDeletion = true;
+
+	//destroy all units
+	for (int i = 0; i < m_units.size(); i++)
+	{
+		Level::GetInstance()->GetTileAtIndex(m_units[i]->GetTileIndex())->RemoveOccupyingUnit();
+		m_units[i]->RemoveFromLayer();
+		delete m_units[i];
+	}
+	m_units.clear();
+
+	//Set all Currently owned buildings to neutral
+	for (int i = 0; i < m_buildings.size(); i++)
+	{
+		m_buildings[i]->SetColour(cocos2d::Color3B(255, 255, 255));
+		m_buildings[i]->SetOwner(NULL);
+	}
+	m_buildings.clear();
+	PlayerManager::GetInstance()->DeleteMarkedPlayers();
 }
 
 void Player::SetStartingCameraPos()

@@ -17,6 +17,8 @@ public:
 	};
 
 	//Constructors
+	bool m_markedForDeletion;
+
 	Player(int, Faction);
 	int GetId();
 	cocos2d::Color3B GetColour();
@@ -29,6 +31,7 @@ public:
 	std::vector<LevelObject*> GetBuildings();
 	void RemoveUnit(Unit* unit);
 	void RemoveBuilding(LevelObject* building);
+	void RemovePlayerFromGame();
 	cocos2d::Vec2 GetLastCameraPos();
 	void SetStartingCameraPos();
 

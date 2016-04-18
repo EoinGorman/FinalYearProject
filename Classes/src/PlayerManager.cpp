@@ -21,6 +21,7 @@ void PlayerManager::ResetPlayerManager()
 {
 	if (m_playerCount > 0)
 	{
+		m_currentPlayerIndex = 0;
 		m_playerCount = 0;
 
 		m_redFactionCount = 0;
@@ -86,4 +87,38 @@ int PlayerManager::GetPlayerCount()
 std::vector<Player*> PlayerManager::GetPlayers()
 {
 	return m_players;
+}
+
+void PlayerManager::DeleteMarkedPlayers()
+{
+	std::vector<Player*> deletionList = std::vector<Player*>();
+	
+	for (int i = 0; i < m_players.size(); i++)
+	{
+		if (m_players[i]->m_markedForDeletion)
+		{
+			deletionList.push_back(m_players[i]);
+		}
+	}
+
+	for (int i = 0; i < deletionList.size(); i++)
+	{
+		m_players.erase(std::remove(m_players.begin(), m_players.end(), deletionList[i]));
+		delete deletionList[i];
+		m_playerCount--;
+	}
+}
+
+Player* PlayerManager::GetCurrentPlayer()
+{
+	return m_players[m_currentPlayerIndex];
+}
+
+void PlayerManager::CycleToNextPlayer()
+{
+	m_currentPlayerIndex++;
+	if (m_currentPlayerIndex >= m_players.size())
+	{
+		m_currentPlayerIndex = 0;
+	}
 }

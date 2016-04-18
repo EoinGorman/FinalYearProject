@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "PlayerManager.h"
 #include "InBetweenTurnsScene.h"
+#include "GameOverScene.h"
 #include <iostream>
 
 #define CameraSpeed 350
@@ -55,7 +56,6 @@ bool Game::init()
 	cameraDirection = Vec2(0, 0);
 	this->setPosition(ScreenWidth/2, ScreenHeight/2);
 
-	Level::GetInstance()->SetLevelToLoad("Level1");
 	Level::GetInstance()->Load(this);
 
 	this->scheduleUpdate();
@@ -68,7 +68,7 @@ bool Game::init()
 		PlayerManager::GetInstance()->GetPlayers()[i]->SetStartingCameraPos();
 	}
 	
-	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
+	PlayerManager::GetInstance()->GetCurrentPlayer()->StartTurn();
 	SetVisibleTiles();
 
 	m_path = std::vector<LevelTile*>();
@@ -86,6 +86,12 @@ void Game::activateInBewtweenTurnsScene(Ref *pSender)
 {
 	auto scene = InBetweenTurnsScene::createScene(Director::getInstance()->getRunningScene());
 	Director::getInstance()->pushScene(TransitionTurnOffTiles::create(0.5f, scene));
+}
+
+void Game::activateGameOverScene(Ref *pSender)
+{
+	auto scene = GameOverScene::createScene();
+	Director::getInstance()->pushScene(TransitionSplitCols::create(1.0f, scene));
 }
 
 void Game::update(float delta)
@@ -167,43 +173,49 @@ void Game::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event 
 		}
 	}
 
-		//Camera movement
-		if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_W)
-		{
-			cameraDirection.y -= 1;
-		}
-		else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_S)
-		{
-			cameraDirection.y += 1;
-		}
-		if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_A)
-		{
-
-			cameraDirection.x += 1;
-		}
-		else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_D)
-		{
-			cameraDirection.x -= 1;
-		}
+	//Camera movement
+	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_W)
+	{
+		if (cameraDirection.y == 0)
+		cameraDirection.y -= 1;
+	}
+	else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_S)
+	{
+		if (cameraDirection.y == 0)
+		cameraDirection.y += 1;
+	}
+	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_A)
+	{
+		if (cameraDirection.x == 0)
+		cameraDirection.x += 1;
+	}
+	else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_D)
+	{
+		if (cameraDirection.x == 0)
+		cameraDirection.x -= 1;
+	}
 }
 
 void Game::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event *event)
 {
 	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_W)
 	{
+		if (cameraDirection.y < 0)
 		cameraDirection.y += 1;
 	}
 	else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_S)
 	{
+		if (cameraDirection.y > 0)
 		cameraDirection.y -= 1;
 	}
 	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_A)
 	{
-
+		if (cameraDirection.x > 0)
 		cameraDirection.x -= 1;
 	}
 	else if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_D)
 	{
+		if (cameraDirection.x < 0)
 		cameraDirection.x += 1;
 	}
 }
@@ -253,7 +265,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 					{
 						if (tile->GetOccupyingObject()->GetOwner()->GetId() == m_currentPlayerID)
 						{
-							if (PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetTurnsTillReinforcements() <= 0)
+							if (PlayerManager::GetInstance()->GetCurrentPlayer()->GetTurnsTillReinforcements() <= 0)
 							{
 								//Select unit to build ---
 								m_levelTileSelected = tile;
@@ -564,8 +576,8 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
 			for (int j = 0; j < neighbourTiles.size(); j++)
 			{
-				bool tileHasFriendlyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() == PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
-				bool tileHasFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() == PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+				bool tileHasFriendlyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() == PlayerManager::GetInstance()->GetCurrentPlayer();
+				bool tileHasFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() == PlayerManager::GetInstance()->GetCurrentPlayer();
 
 				if (!neighbourTiles[j]->GetChecked() && (!neighbourTiles[j]->HasUnit() || tileHasFriendlyUnit) && (!neighbourTiles[j]->HasObject() ||tileHasFriendlyBuilding))
 				{
@@ -650,14 +662,14 @@ void Game::SetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit)
 					neighbourTiles[j]->SetChecked(true);
 					
 					//Check if tile has an enemy unit, and if it does make sure it is attackable
-					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
 					if (tileHasEnemyUnit)
 					{
 						tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
 					}
 
 					//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
-					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
 					if (tileHasNonFriendlyBuilding)
 					{
 						if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
@@ -717,14 +729,14 @@ std::vector<LevelTile*> Game::GetSelectableTilesForAttacking(LevelTile* currentT
 				{
 					neighbourTiles[j]->SetChecked(true);
 					//Check if tile has an enemy unit, and if it does make sure it is attackable
-					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
 					if (tileHasEnemyUnit)
 					{
 						tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
 					}
 
 					//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
-					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
 					if (tileHasNonFriendlyBuilding)
 					{
 						if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
@@ -765,9 +777,9 @@ void Game::SpawnUnit(LevelTile* tile)
 	{
 		tile->ActivateAltSprite("", false);
 	}
-	Unit* newUnit = new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
+	Unit* newUnit = new Unit(m_unitTypeSelected, Level::GetInstance()->GetTileIndexPosition(tile), PlayerManager::GetInstance()->GetCurrentPlayer());
 	tile->BuildUnitHere(newUnit, this);	//WHEN DONE, CREATE A NEW UNIT AND PASS IN HERE
-	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->AddUnit(newUnit);	//Add to players unit list also
+	PlayerManager::GetInstance()->GetCurrentPlayer()->AddUnit(newUnit);	//Add to players unit list also
 	m_selectableTiles.clear();
 	m_currentStage = Waiting;
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
@@ -782,21 +794,24 @@ void Game::SpawnUnit(LevelTile* tile)
 void Game::EndTurn()
 {
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
-	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->EndTurn(this);
+	PlayerManager::GetInstance()->GetCurrentPlayer()->EndTurn(this);
 	SetNextPlayer();
 	activateInBewtweenTurnsScene(this);
 }
 
 void Game::StartTurn()
 {
-	PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->StartTurn();
+	PlayerManager::GetInstance()->GetCurrentPlayer()->StartTurn();
 
 	auto scene = this->getParent();
 	HudLayer* hud = (HudLayer*)scene->getChildByName("HudLayer");
 	hud->UpdateLabels(m_currentPlayerID);
 
 	//Move camera
-	Vec2 lastPos = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetLastCameraPos();
+	//cameraDirection.x = 0;
+	//cameraDirection.y = 0;
+
+	Vec2 lastPos = PlayerManager::GetInstance()->GetCurrentPlayer()->GetLastCameraPos();
 	this->setPosition(lastPos);
 
 	//Cancel
@@ -832,7 +847,7 @@ void Game::ToggleBuildMenu()
 
 void Game::SetUnitTypeSelected(Unit::Type type)
 {
-	int ticketsRemaining = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID)->GetTicketsRemaining();
+	int ticketsRemaining = PlayerManager::GetInstance()->GetCurrentPlayer()->GetTicketsRemaining();
 	int cost = INT32_MAX;
 
 	switch (type)
@@ -846,11 +861,11 @@ void Game::SetUnitTypeSelected(Unit::Type type)
 	case Unit::Type::smallTank:
 		cost = 25;
 		break;
-	case Unit::Type::tBoat:
+	case Unit::Type::scoutBoat:
 		cost = 20;
 		break;
-	case Unit::Type::tCopter:
-		cost = 25;
+	case Unit::Type::scoutCopter:
+		cost = 20;
 		break;
 	case Unit::Type::soldier2:
 		cost = 15;
@@ -885,14 +900,10 @@ void Game::SetUnitTypeSelected(Unit::Type type)
 
 void Game::SetNextPlayer()
 {
-	if (m_currentPlayerID >= PlayerManager::GetInstance()->GetPlayerCount() -1)	//If player count is 2 then the second players ID will be 1 so need to subtract here
-	{
-		m_currentPlayerID = 0;
-	}
-	else
-	{
-		m_currentPlayerID++;
-	}
+	PlayerManager::GetInstance()->CycleToNextPlayer();
+	m_currentPlayerID = PlayerManager::GetInstance()->GetCurrentPlayer()->GetId();
+	cameraDirection.x = 0;
+	cameraDirection.y = 0;
 }
 
 void Game::SetVisibleTiles()
@@ -911,7 +922,7 @@ void Game::SetVisibleTiles()
 std::vector<LevelTile*> Game::GetAllFOWVisibleTiles()
 {
 	std::vector<LevelTile*> visibleTiles;
-	Player* currentPlayer = PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID);
+	Player* currentPlayer = PlayerManager::GetInstance()->GetCurrentPlayer();
 
 	for each (Unit* unit in currentPlayer->GetUnits())
 	{
@@ -1046,8 +1057,14 @@ void Game::UnitAttack(Unit* attackingUnit, LevelObject* building)
 		if (building->GetOwner())
 		{
 			building->GetOwner()->RemoveBuilding(building);
+
+			//If there is only one player left end the game
+			if (PlayerManager::GetInstance()->GetPlayerCount() == 1)
+			{
+				activateGameOverScene(this);
+			}
 		}
-		building->SetOwner(PlayerManager::GetInstance()->GetPlayerByID(m_currentPlayerID));
+		building->SetOwner(PlayerManager::GetInstance()->GetCurrentPlayer());
 	}
 
 	attackingUnit->SetUsed(true);

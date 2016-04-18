@@ -95,10 +95,10 @@ void HudLayer::CreateBuildMenu()
 		case Unit::Type::smallTank:
 			priceLabel = cocos2d::LabelTTF::create("25", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
 			break;
-		case Unit::Type::tBoat:
+		case Unit::Type::scoutBoat:
 			priceLabel = cocos2d::LabelTTF::create("20", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
 			break;
-		case Unit::Type::tCopter:
+		case Unit::Type::scoutCopter:
 			priceLabel = cocos2d::LabelTTF::create("25", "fonts/Akashi.ttf", 32, cocos2d::Size(50, 50), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::CENTER);
 			break;
 		case Unit::Type::soldier2:

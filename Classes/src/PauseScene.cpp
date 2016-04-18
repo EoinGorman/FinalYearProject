@@ -25,7 +25,6 @@ bool Pause::init()
 		"MainMenuScene/playButtonClicked.png",
 		CC_CALLBACK_1(Pause::resume, this));
 
-
 	auto quitItem =
 		MenuItemImage::create("MainMenuScene/quitButtonDefault.png",
 		"MainMenuScene/quitButtonClicked.png",
@@ -52,7 +51,7 @@ void Pause::activateMainMenuScene(Ref *pSender)
 	auto scene = MainMenu::createScene();
 	Director::getInstance()->popScene();
 	delete Level::GetInstance();
-	Director::getInstance()->replaceScene(scene);
+	Director::getInstance()->replaceScene(TransitionFadeTR::create(1.0f, scene));
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 }
 
