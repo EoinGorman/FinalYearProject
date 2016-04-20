@@ -37,7 +37,13 @@ bool MainMenu::init()
 
 	// Returns visible size of OpenGL window in points.
 	Size visibleSize = Director::getInstance()->getVisibleSize(); 
-	menu->alignItemsVerticallyWithPadding(visibleSize.height / 3);
+	menu->alignItemsVerticallyWithPadding(visibleSize.height / 4);
+
+	//Scene title
+	auto* sceneTitle = cocos2d::LabelTTF::create("-WAR-", "fonts/Akashi.ttf", 95, cocos2d::Size(visibleSize.width, 95), cocos2d::TextHAlignment::CENTER, cocos2d::TextVAlignment::TOP);
+	sceneTitle->setColor(cocos2d::Color3B(255, 255, 255));
+	sceneTitle->setPositionX(visibleSize.width / 2);
+	sceneTitle->setPositionY(visibleSize.height - sceneTitle->getBoundingBox().size.height / 1.5f);
 
 	//Add Background
 	auto backgroundSprite = cocos2d::Sprite::create("MainMenuScene/frame_0_delay.png");
@@ -62,6 +68,7 @@ bool MainMenu::init()
 	backgroundSprite->runAction(animate);
 	this->addChild(backgroundSprite);
 	this->addChild(menu);
+	this->addChild(sceneTitle);
 	 
 	return true;
 }

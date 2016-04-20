@@ -172,10 +172,12 @@ void CharacterSelectScene::LeftArrowClicked()
 	{
 		m_arrowClicked = true;
 		m_itemMoveDirection = -1;
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 	else
 	{
 		//play negative sound effect
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -185,10 +187,12 @@ void CharacterSelectScene::RightArrowClicked()
 	{
 		m_arrowClicked = true;
 		m_itemMoveDirection = 1;
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 	else
 	{
 		//play negative sound effect
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -196,8 +200,14 @@ void CharacterSelectScene::ToggleConfirmPopUp(Ref *pSender)
 {
 	if (!m_arrowClicked)
 	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 		m_characterItem->setEnabled(m_confirmationPopUp->isVisible());
 		m_confirmationPopUp->setVisible(!m_confirmationPopUp->isVisible());
+	}
+	else
+	{
+		//play negative sound effect
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -230,6 +240,7 @@ void CharacterSelectScene::CreateConfirmationPopUp()
 
 void CharacterSelectScene::CharacterConfirmed(Ref* pSender)
 {
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 	//select character
 	if (m_characterNames[m_characterIndex] == "Red")
 	{

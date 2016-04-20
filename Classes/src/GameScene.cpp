@@ -276,6 +276,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 							}
 							else
 							{
+								CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 								//Play failed sound
 							}
 						}
@@ -311,6 +312,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 			if (clickCanceled)
 			{
 				//Cancel spawn
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 				for each (LevelTile* tile in m_selectableTiles)
 				{
 					tile->ActivateAltSprite("", false);
@@ -359,6 +361,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 
 						m_selectableTiles.clear();
 						m_currentStage = Moving;
+						CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("GameScene/placeUnitSound.wav", false, 1.0f, 1.0f, 1.0f);
 						break;
 					}
 				}
@@ -367,6 +370,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 			if (clickCanceled)
 			{
 				//Cancel spawn
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 				for each (LevelTile* tile in m_path)
 				{
 					tile->ActivateAltSprite("", false);
@@ -441,6 +445,7 @@ void Game::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 			if (clickCanceled)
 			{
 				//Cancel spawn
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 				for each (LevelTile* tile in m_path)
 				{
 					tile->ActivateAltSprite("", false);
@@ -515,6 +520,7 @@ void Game::onMouseMove(Event *event)
 
 					m_path = Level::GetInstance()->GetPath(m_levelTileSelected, tile, m_selectableTiles);
 					tile->SetInPath(true);
+					CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("AStarSound.wav", false);
 
 					for each (LevelTile* t in m_path)
 					{
@@ -525,10 +531,6 @@ void Game::onMouseMove(Event *event)
 						tile->ActivateAltSprite("Attacking", true);
 					}
 					break;
-				}
-				else
-				{
-					tile->SetInPath(false);
 				}
 			}
 			break;
@@ -907,6 +909,7 @@ void Game::SetUnitTypeSelected(Unit::Type type)
 	else
 	{
 		//Play failed sound
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -1050,6 +1053,33 @@ void Game::UnitAttack(Unit* attackingUnit, Unit* otherUnit)
 		delete otherUnit;
 	}
 	attackingUnit->SetUsed(true);
+
+	switch (attackingUnit->GetType())
+	{
+	case Unit::soldier:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("infantryOneAttackSound.wav", false);
+		break;
+	case Unit::mortarSquad:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("rangedOneAttackSound.wav", false);
+		break;
+	case Unit::smallTank:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tankOneAttackSound.wav", false);
+		break;
+	case Unit::soldier2:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("infantryTwoAttackSound.wav", false);
+		break;
+	case Unit::artillery:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("rangedTwoAttackSound.wav", false);
+		break;
+	case Unit::largeTank:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tankTwoAttackSound.wav", false);
+		break;
+	case Unit::attackBoat:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("attackBoatAttackSound.wav", false);
+		break;
+	case Unit::attackCopter:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("attackHelicopterAttackSound.wav", false);
+	}
 }
 
 void Game::UnitAttack(Unit* attackingUnit, LevelObject* building)
@@ -1080,9 +1110,19 @@ void Game::UnitAttack(Unit* attackingUnit, LevelObject* building)
 			}
 		}
 		building->SetOwner(PlayerManager::GetInstance()->GetCurrentPlayer());
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("captureBuildingSound.wav", false);
 	}
 
 	attackingUnit->SetUsed(true);
+	switch (attackingUnit->GetType())
+	{
+	case Unit::soldier:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("infantryOneAttackSound.wav", false);
+		break;
+	case Unit::soldier2:
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("infantryTwoAttackSound.wav", false);
+		break;
+	}
 }
 
 void Game::onEnterTransitionDidFinish()

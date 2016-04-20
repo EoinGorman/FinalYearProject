@@ -170,10 +170,12 @@ void LevelSelectScene::LeftArrowClicked()
 	{
 		m_arrowClicked = true;
 		m_itemMoveDirection = -1;
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 	else
 	{
 		//play negative sound effect
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -183,10 +185,12 @@ void LevelSelectScene::RightArrowClicked()
 	{
 		m_arrowClicked = true;
 		m_itemMoveDirection = 1;
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 	else
 	{
 		//play negative sound effect
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -194,8 +198,13 @@ void LevelSelectScene::ToggleConfirmPopUp(Ref *pSender)
 {
 	if (!m_arrowClicked)
 	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("buttonClickSound.wav", false, 1.0f, 1.0f, 1.0f);
 		m_levelItem->setEnabled(m_confirmationPopUp->isVisible());
 		m_confirmationPopUp->setVisible(!m_confirmationPopUp->isVisible());
+	}
+	else
+	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("wrongSelectionBeep.wav", false, 1.0f, 1.0f, 1.0f);
 	}
 }
 
@@ -273,6 +282,9 @@ void LevelSelectScene::SetLevelPreviewPaths()
 
 	m_levelPreviewPaths.push_back("LevelPreviews/LevelPreview2.png");
 	m_levelPreviewClickedPaths.push_back("LevelPreviews/LevelPreviewClicked2.png");
+
+	m_levelPreviewPaths.push_back("LevelPreviews/LevelPreview3.png");
+	m_levelPreviewClickedPaths.push_back("LevelPreviews/LevelPreviewClicked3.png");
 	//....
 	//....
 	//....
@@ -288,6 +300,8 @@ void LevelSelectScene::SetLevelNames()
 	m_levelNames.push_back("Triple Threat");
 
 	m_levelNames.push_back("Fever Pitch");
+
+	m_levelNames.push_back("Four Corners");
 	//....
 	//....
 	//....
@@ -303,6 +317,8 @@ void LevelSelectScene::SetLevelDescriptions()
 	m_levelDescriptions.push_back("- Three Player Map.\n- Size = Large.\n");
 
 	m_levelDescriptions.push_back("- Two Player Map.\n- Size = Large.\n");
+
+	m_levelDescriptions.push_back("- Four Player Map.\n- Size = Large.\n");
 	//....
 	//....
 	//....
@@ -318,6 +334,8 @@ void LevelSelectScene::SetLevelPlayerCount()
 	m_levelPlayerCount.push_back(3);
 
 	m_levelPlayerCount.push_back(2);
+
+	m_levelPlayerCount.push_back(4);
 	//....
 	//....
 	//....

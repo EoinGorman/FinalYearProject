@@ -154,6 +154,10 @@ bool LevelTile::GetChecked()
 
 void LevelTile::SetInPath(bool value)
 {
+	if (value)
+	{
+		m_inPath = value;
+	}
 	m_inPath = value;
 }
 
@@ -743,7 +747,7 @@ void LevelTile::ChooseCorrectSprite()
 				}
 				else if (waterBelow && waterToLeft)
 				{
-					animationPath = "SeaAnimations/waterUpLeft.png";
+					animationPath = "SeaAnimations/waterLeftUp.png";
 				}
 			}
 			else
