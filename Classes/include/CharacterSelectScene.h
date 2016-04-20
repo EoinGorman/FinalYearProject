@@ -39,6 +39,7 @@ private:
 	void CharacterSelectScene::CreateConfirmationPopUp();
 	void CharacterSelectScene::ToggleConfirmPopUp(Ref *pSender);
 	void CharacterSelectScene::CharacterConfirmed(Ref *pSender);
+	void CharacterSelectScene::RemoveCharacterFromLists(int index);
 
 	bool m_arrowClicked;
 	int m_itemMoveDirection;	//Either be 1 or -1 and just multiply this in the moving equation

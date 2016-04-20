@@ -67,7 +67,10 @@ bool Game::init()
 		PlayerManager::GetInstance()->GetPlayers()[i]->EndTurn(this);
 		PlayerManager::GetInstance()->GetPlayers()[i]->SetStartingCameraPos();
 	}
-	
+
+	Vec2 lastPos = PlayerManager::GetInstance()->GetCurrentPlayer()->GetLastCameraPos();
+	this->setPosition(lastPos);
+
 	PlayerManager::GetInstance()->GetCurrentPlayer()->StartTurn();
 	SetVisibleTiles();
 
@@ -576,21 +579,24 @@ void Game::SetSelectableTilesForMoving(LevelTile* currentTile, Unit* unit)
 			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
 			for (int j = 0; j < neighbourTiles.size(); j++)
 			{
-				bool tileHasFriendlyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() == PlayerManager::GetInstance()->GetCurrentPlayer();
-				bool tileHasFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() == PlayerManager::GetInstance()->GetCurrentPlayer();
-
-				if (!neighbourTiles[j]->GetChecked() && (!neighbourTiles[j]->HasUnit() || tileHasFriendlyUnit) && (!neighbourTiles[j]->HasObject() ||tileHasFriendlyBuilding))
+				if (neighbourTiles[j] != NULL)
 				{
-					if (Level::GetInstance()->IsMoveableTile(unit->GetType(), neighbourTiles[j]->GetType()))
+					bool tileHasFriendlyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() == PlayerManager::GetInstance()->GetCurrentPlayer();
+					bool tileHasFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() == PlayerManager::GetInstance()->GetCurrentPlayer();
+
+					if (!neighbourTiles[j]->GetChecked() && (!neighbourTiles[j]->HasUnit() || tileHasFriendlyUnit) && (!neighbourTiles[j]->HasObject() || tileHasFriendlyBuilding))
 					{
-						neighbourTiles[j]->SetChecked(true);
-						if (!tileHasFriendlyUnit && !tileHasFriendlyBuilding)
+						if (Level::GetInstance()->IsMoveableTile(unit->GetType(), neighbourTiles[j]->GetType()))
 						{
-							neighbourTiles[j]->ActivateAltSprite("Moving", true);
+							neighbourTiles[j]->SetChecked(true);
+							if (!tileHasFriendlyUnit && !tileHasFriendlyBuilding)
+							{
+								neighbourTiles[j]->ActivateAltSprite("Moving", true);
+							}
+							m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+							validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+							tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
 						}
-						m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
-						validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
-						tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
 					}
 				}
 			}
@@ -657,38 +663,41 @@ void Game::SetSelectableTilesForAttacking(LevelTile* currentTile, Unit* unit)
 			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
 			for (int j = 0; j < neighbourTiles.size(); j++)
 			{
-				if (!neighbourTiles[j]->GetChecked())
+				if (neighbourTiles[j] != NULL)
 				{
-					neighbourTiles[j]->SetChecked(true);
-					
-					//Check if tile has an enemy unit, and if it does make sure it is attackable
-					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
-					if (tileHasEnemyUnit)
+					if (!neighbourTiles[j]->GetChecked())
 					{
-						tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
-					}
+						neighbourTiles[j]->SetChecked(true);
 
-					//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
-					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
-					if (tileHasNonFriendlyBuilding)
-					{
-						if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
+						//Check if tile has an enemy unit, and if it does make sure it is attackable
+						bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
+						if (tileHasEnemyUnit)
 						{
+							tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
+						}
+
+						//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
+						bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
+						if (tileHasNonFriendlyBuilding)
+						{
+							if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
+							{
 								tileHasNonFriendlyBuilding = true;
+							}
+							else
+							{
+								tileHasNonFriendlyBuilding = false;
+							}
 						}
-						else
-						{
-							tileHasNonFriendlyBuilding = false;
-						}
-					}
 
-					if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
-					{
-						neighbourTiles[j]->ActivateAltSprite("Attacking", true);
-						m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+						if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
+						{
+							neighbourTiles[j]->ActivateAltSprite("Attacking", true);
+							m_selectableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+						}
+						validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+						tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
 					}
-					validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
-					tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
 				}
 			}
 		}
@@ -725,36 +734,39 @@ std::vector<LevelTile*> Game::GetSelectableTilesForAttacking(LevelTile* currentT
 			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
 			for (int j = 0; j < neighbourTiles.size(); j++)
 			{
-				if (!neighbourTiles[j]->GetChecked())
+				if (neighbourTiles[j] != NULL)
 				{
-					neighbourTiles[j]->SetChecked(true);
-					//Check if tile has an enemy unit, and if it does make sure it is attackable
-					bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
-					if (tileHasEnemyUnit)
+					if (!neighbourTiles[j]->GetChecked())
 					{
-						tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
-					}
-
-					//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
-					bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
-					if (tileHasNonFriendlyBuilding)
-					{
-						if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
+						neighbourTiles[j]->SetChecked(true);
+						//Check if tile has an enemy unit, and if it does make sure it is attackable
+						bool tileHasEnemyUnit = neighbourTiles[j]->HasUnit() && neighbourTiles[j]->GetOccupyingUnit()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
+						if (tileHasEnemyUnit)
 						{
+							tileHasEnemyUnit = Level::GetInstance()->IsAttackableUnit(m_unitSelected->GetType(), neighbourTiles[j]->GetOccupyingUnit()->GetMovementType());
+						}
+
+						//Check if a tile has a non friendly building, and if it does check if unit is an infantry type
+						bool tileHasNonFriendlyBuilding = neighbourTiles[j]->HasObject() && neighbourTiles[j]->GetOccupyingObject()->GetOwner() != PlayerManager::GetInstance()->GetCurrentPlayer();
+						if (tileHasNonFriendlyBuilding)
+						{
+							if (m_unitSelected->GetMovementType() == Unit::MovementType::foot && m_unitSelected->m_attackRange == 1.0f)
+							{
 								tileHasNonFriendlyBuilding = true;
+							}
+							else
+							{
+								tileHasNonFriendlyBuilding = false;
+							}
 						}
-						else
-						{
-							tileHasNonFriendlyBuilding = false;
-						}
-					}
 
-					if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
-					{
-						attackableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+						if (tileHasEnemyUnit || tileHasNonFriendlyBuilding)
+						{
+							attackableTiles.push_back(neighbourTiles[j]);	//Place here because this tile is good to move to
+						}
+						validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+						tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
 					}
-					validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
-					tilesToReset.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that need to have values reset after search
 				}
 			}
 		}
@@ -963,11 +975,14 @@ std::vector<LevelTile*> Game::GetAllTilesInSightRange(LevelTile* currentTile, Un
 			std::vector<LevelTile*> neighbourTiles = Level::GetInstance()->GetNeighbourTiles(tilesToCheck[i]);
 			for (int j = 0; j < neighbourTiles.size(); j++)
 			{
-				if (!neighbourTiles[j]->GetChecked())
+				if (neighbourTiles[j] != NULL)
 				{
-					neighbourTiles[j]->SetChecked(true);
-					validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
-					tilesInSight.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that are in sight
+					if (!neighbourTiles[j]->GetChecked())
+					{
+						neighbourTiles[j]->SetChecked(true);
+						validTiles.push_back(neighbourTiles[j]);	//Place here so this tiles neighbours get checked
+						tilesInSight.push_back(neighbourTiles[j]);	//Place here so we keep a list of all tiles that are in sight
+					}
 				}
 			}
 		}

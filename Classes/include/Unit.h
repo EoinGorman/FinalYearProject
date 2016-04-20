@@ -17,13 +17,13 @@ public:
 
 	enum Type
 	{
-		soldier = 0,
-		mortarSquad = 1,
+		soldier = 0,	//found
+		mortarSquad = 1,	//found
 		smallTank = 2,
 		scoutBoat = 3,
 		scoutCopter = 4,
 
-		soldier2 = 5,
+		soldier2 = 5,	//found
 		artillery = 6,
 		largeTank = 7,
 		attackBoat = 8,
@@ -46,7 +46,7 @@ public:
 	void SetInSight(bool value);
 	Player* GetOwner();
 	void StartTurn(cocos2d::Color3B colour);
-	void EndTurn();
+	void EndTurn(cocos2d::Color3B colour);
 	bool GetMoved();
 	void SetMoved(bool value);
 	bool GetUsed();

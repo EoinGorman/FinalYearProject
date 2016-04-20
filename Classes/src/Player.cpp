@@ -112,15 +112,24 @@ void Player::StartTurn()
 
 	for (int i = 0; i < m_buildings.size(); i++)
 	{
-		m_buildings[i]->SetColour(m_colour);
+		//m_buildings[i]->SetColour(m_colour);
 		
 		//for each building owned, add reinforcement tickets
-		m_reinforcementTickets += 10;
+		m_reinforcementTickets += 15;
+
+		//If the building is a hq add an extra 10
+		if (m_buildings[i]->GetType() == LevelObject::HQ)
+		{
+			m_reinforcementTickets += 10;
+		}
 	}
 
 	if (m_turnsTillNextBuild <= 0)
 	{
-		m_turnsTillNextBuild = 5; //TEMP - Calculate based on distance of furthest city
+		for (int i = 0; i < m_buildings.size(); i++)
+		{
+			m_turnsTillNextBuild += i; //TEMP - Calculate based on number of cities owned
+		}
 	}
 	else
 	{
@@ -132,12 +141,12 @@ void Player::EndTurn(Game* game)
 {
 	for (int i = 0; i < m_units.size(); i++)
 	{
-		m_units[i]->EndTurn();
+		m_units[i]->EndTurn(m_colour);
 	}
 
 	for (int i = 0; i < m_buildings.size(); i++)
 	{
-		m_buildings[i]->SetColour(cocos2d::Color3B(50, 50, 50));
+		//m_buildings[i]->SetColour(cocos2d::Color3B(50, 50, 50));
 	}
 	
 	m_lastCameraPos = game->getPosition();

@@ -231,7 +231,23 @@ void CharacterSelectScene::CreateConfirmationPopUp()
 void CharacterSelectScene::CharacterConfirmed(Ref* pSender)
 {
 	//select character
-	m_factionsChosen.push_back(Player::Faction(m_characterIndex));
+	if (m_characterNames[m_characterIndex] == "Red")
+	{
+		m_factionsChosen.push_back(Player::Faction::red);
+	}
+	else if (m_characterNames[m_characterIndex] == "Blue")
+	{
+		m_factionsChosen.push_back(Player::Faction::blue);
+	}
+	else if (m_characterNames[m_characterIndex] == "Green")
+	{
+		m_factionsChosen.push_back(Player::Faction::green);
+	}
+	else
+	{
+		m_factionsChosen.push_back(Player::Faction::yellow);
+	}
+
 	m_chosenCount++;
 
 	if (m_chosenCount >= Level::GetInstance()->GetNumberOfHQs())
@@ -242,6 +258,9 @@ void CharacterSelectScene::CharacterConfirmed(Ref* pSender)
 	{
 		//close pop up
 		ToggleConfirmPopUp(this);
+
+		//Remove chosen character from list
+		RemoveCharacterFromLists(m_characterIndex);
 
 		//Set selection wheel to beggining
 		m_characterIndex = 0;
@@ -267,7 +286,7 @@ cocos2d::Menu* CharacterSelectScene::CreateCharacterItem(int index)
 
 	auto levelPreview =
 		MenuItemImage::create(m_characterLogoPaths[index],
-		m_characterLogoClickedPaths[0],
+		m_characterLogoClickedPaths[index],
 		CC_CALLBACK_1(CharacterSelectScene::ToggleConfirmPopUp, this));
 
 	auto levelitem = Menu::create(levelPreview, levelname, levelDescription, NULL);
@@ -321,6 +340,15 @@ void CharacterSelectScene::SetCharacterDescriptions()
 	m_characterDescriptions.push_back("- Blue Faction\nThey Are Blue. :)");
 	m_characterDescriptions.push_back("- Green Faction\nThey Are Green. ;)");
 	m_characterDescriptions.push_back("- Yellow Faction\nThey Are Yellow. -_-");
+}
+
+void CharacterSelectScene::RemoveCharacterFromLists(int index)
+{
+	//m_units.erase(std::remove(m_units.begin(), m_units.end(), unit));
+	m_characterLogoPaths.erase(std::remove(m_characterLogoPaths.begin(), m_characterLogoPaths.end(), m_characterLogoPaths[index]));
+	m_characterLogoClickedPaths.erase(std::remove(m_characterLogoClickedPaths.begin(), m_characterLogoClickedPaths.end(), m_characterLogoClickedPaths[index]));
+	m_characterNames.erase(std::remove(m_characterNames.begin(), m_characterNames.end(), m_characterNames[index]));
+	m_characterDescriptions.erase(std::remove(m_characterDescriptions.begin(), m_characterDescriptions.end(), m_characterDescriptions[index]));
 }
 
 void CharacterSelectScene::onEnterTransitionDidFinish()

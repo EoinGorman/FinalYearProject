@@ -66,10 +66,17 @@ void Level::Load(cocos2d::Layer* layer)
 	{
 		for (int j = 0; j < ptr->m_width; j++)
 		{
-			m_levelTerrain.push_back(new LevelTile(LevelTile::Type(terrainTypes[count]), cocos2d::Vec2(ptr->m_tileSize * j, ptr->m_tileSize * i), cocos2d::Vec2(j, i)));
-			m_levelTerrain[count]->AddSpritesToScene(layer);
+			cocos2d::Vec2 pos = cocos2d::Vec2((ptr->m_tileSize * j), (ptr->m_tileSize * i));
+			m_levelTerrain.push_back(new LevelTile(LevelTile::Type(terrainTypes[count]), pos, cocos2d::Vec2(j, i)));
 			count++;
 		}
+	}
+
+	//Set Sprites/Animations for Tiles
+	for (int i = 0; i < m_levelTerrain.size(); i++)
+	{
+		m_levelTerrain[i]->ChooseCorrectSprite();
+		m_levelTerrain[i]->AddSpritesToScene(layer);
 	}
 
 	//Create and place objects (buildings for now I think?)
@@ -140,7 +147,7 @@ bool Level::IsMoveableTile(Unit::Type unitType, LevelTile::Type tyleType)
 		else
 			return true;
 	case Unit::Type::smallTank:
-		if (tyleType == LevelTile::Type::Sea || tyleType == LevelTile::Type::Mountain || tyleType == LevelTile::Type::Jungle)
+		if (tyleType == LevelTile::Type::Sea || tyleType == LevelTile::Type::Mountain || tyleType == LevelTile::Type::Jungle || tyleType == LevelTile::Type::River)
 			return false;
 		else
 			return true;
@@ -162,7 +169,7 @@ bool Level::IsMoveableTile(Unit::Type unitType, LevelTile::Type tyleType)
 		else
 			return true;
 	case Unit::Type::largeTank:
-		if (tyleType == LevelTile::Type::Sea || tyleType == LevelTile::Type::Mountain || tyleType == LevelTile::Type::Jungle)
+		if (tyleType == LevelTile::Type::Sea || tyleType == LevelTile::Type::Mountain || tyleType == LevelTile::Type::Jungle || tyleType == LevelTile::Type::River)
 			return false;
 		else
 			return true;
@@ -248,20 +255,36 @@ std::vector<LevelTile*> Level::GetNeighbourTiles(LevelTile* tile)
 	{
 		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x - 1, tileIndex.y)));
 	}
+	else
+	{
+		neighbourTiles.push_back(NULL);
+	}
 
 	if (tileIndex.x < ptr->m_width - 1)	//Can Check Right
 	{
 		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x + 1, tileIndex.y)));
+	}
+	else
+	{
+		neighbourTiles.push_back(NULL);
 	}
 
 	if (tileIndex.y > 0)	//Can Check Above
 	{
 		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x, tileIndex.y - 1)));
 	}
+	else
+	{
+		neighbourTiles.push_back(NULL);
+	}
 
 	if (tileIndex.y < ptr->m_height - 1)	//Can Check Below
 	{
 		neighbourTiles.push_back(GetTileAtIndex(cocos2d::Vec2(tileIndex.x, tileIndex.y + 1)));
+	}
+	else
+	{
+		neighbourTiles.push_back(NULL);
 	}
 
 	return neighbourTiles;
@@ -289,32 +312,35 @@ std::vector<LevelTile*> Level::GetPath(LevelTile* start, LevelTile* goal, std::l
 
 		for each (LevelTile* tile in GetNeighbourTiles(currentTile))
 		{
-			if (std::find(availableTiles.begin(), availableTiles.end(), tile) != availableTiles.end())
+			if (tile != NULL)
 			{
-				if (!tile->GetChecked())
+				if (std::find(availableTiles.begin(), availableTiles.end(), tile) != availableTiles.end())
 				{
-					tile->SetParent(currentTile);
-					tile->SetCostVariables(GetDistanceSoFar(tile), GetManhattanDistance(tile, goal));
-					openList.push(tile);
-				}
-				else if (tile->GetParent() != NULL)
-				{
-					if (tile->GetCostToThis() > tile->GetParent()->GetCostToThis() + tile->GetMovementCost())
+					if (!tile->GetChecked())
 					{
-						// Change its parent and g score
 						tile->SetParent(currentTile);
 						tile->SetCostVariables(GetDistanceSoFar(tile), GetManhattanDistance(tile, goal));
+						openList.push(tile);
 					}
-				}
-				if (openList.size() == 0)
-				{
-					//Reset All Tile Values
-					start->ResetSearchVariables();
-					for each (LevelTile* tile in availableTiles)
+					else if (tile->GetParent() != NULL)
 					{
-						tile->ResetSearchVariables();
+						if (tile->GetCostToThis() > tile->GetParent()->GetCostToThis() + tile->GetMovementCost())
+						{
+							// Change its parent and g score
+							tile->SetParent(currentTile);
+							tile->SetCostVariables(GetDistanceSoFar(tile), GetManhattanDistance(tile, goal));
+						}
 					}
-					return std::vector<LevelTile*>();
+					if (openList.size() == 0)
+					{
+						//Reset All Tile Values
+						start->ResetSearchVariables();
+						for each (LevelTile* tile in availableTiles)
+						{
+							tile->ResetSearchVariables();
+						}
+						return std::vector<LevelTile*>();
+					}
 				}
 			}
 		}

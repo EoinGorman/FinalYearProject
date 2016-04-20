@@ -28,6 +28,7 @@ public:
 	cocos2d::Sprite* GetSprite();
 	cocos2d::Vec2 GetPosition();
 	cocos2d::Vec2 GetIndex();
+	void ChooseCorrectSprite();
 
 	//Buildings
 	bool HasObject();

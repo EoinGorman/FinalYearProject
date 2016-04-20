@@ -2,6 +2,9 @@
 #include "GameData.h"
 #include "Player.h"
 
+//All tiles are 50x50 except the tall mountains wich are 50x62
+//As of now 9 is the spacing between tiles, probably will remove
+
 LevelObject::LevelObject()
 {
 	m_healthLabel = cocos2d::LabelTTF::create("10", "fonts/Akashi.ttf", 18, cocos2d::Size(25, 25));
